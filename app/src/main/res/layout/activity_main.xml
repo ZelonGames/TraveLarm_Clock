@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="zelongames.travelarm_clock.MainActivity">
+    tools:context="zelongames.travelarm_clock.Activities.MainActivity">
 
     <fragment xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
@@ -14,4 +14,45 @@
         tools:context=".MapsActivity"
         android:name="com.google.android.gms.maps.SupportMapFragment" />
 
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <include layout="@layout/toolbar"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_marginTop="60dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginLeft="10dp"
+        android:elevation="10dp"
+        android:background="@drawable/white_border"
+        android:id="@+id/SearchLocationBackground">
+
+        <ImageView
+            android:layout_width="15dp"
+            android:layout_height="15dp"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="10dp"
+            android:id="@+id/ic_magnify"
+            android:src="@drawable/ic_magnify"
+            />
+        
+        <AutoCompleteTextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_toRightOf="@id/ic_magnify"
+            android:layout_centerVertical="true"
+            android:textSize="18sp"
+            android:textColor="#000"
+            android:background="@null"
+            android:hint="Search for a location"
+            android:inputType="text"
+            android:imeOptions="actionSearch"
+            android:maxLines="1"
+            android:id="@+id/input_search"
+            />
+
+    </RelativeLayout>
+    </RelativeLayout>
 </android.support.constraint.ConstraintLayout>
