@@ -13,11 +13,12 @@ public class ToolbarCompatActivity extends AppCompatActivity {
     private int menuID = 0;
     protected Toolbar toolbar = null;
 
-    protected void initializeToolBar(String title, int menuID){
+    protected void initializeToolBar(String title, int menuID, boolean displayBackButton){
         this.menuID = menuID;
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle(title);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(displayBackButton);
     }
 
     @Override
@@ -34,12 +35,14 @@ public class ToolbarCompatActivity extends AppCompatActivity {
                 Intent alarmCollectionIntent = new Intent(this, AlarmCollectionActivity.class);
                 startActivity(alarmCollectionIntent);
                 break;
-            case R.id.back:
-                Intent previousIntent = new Intent(this, AlarmCollectionActivity.class);
-                startActivity(previousIntent);
-                break;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
     }
 }

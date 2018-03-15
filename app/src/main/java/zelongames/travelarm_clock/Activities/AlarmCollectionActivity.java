@@ -11,6 +11,6 @@ public class AlarmCollectionActivity extends ToolbarCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_alarm_collection);
 
-        initializeToolBar("Alarm Collection", R.menu.menu_toolbar_back);
+        initializeToolBar("Alarm Collection", R.menu.menu_toolbar_back, true);
     }
 }

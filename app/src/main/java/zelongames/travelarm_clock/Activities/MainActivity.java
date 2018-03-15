@@ -78,7 +78,7 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        initializeToolBar("TraveLarm Clock", R.menu.menu_toolbar_main);
+        initializeToolBar("TraveLarm Clock", R.menu.menu_toolbar_main, false);
 
         searchText = (AutoCompleteTextView) findViewById(R.id.input_search);
 
