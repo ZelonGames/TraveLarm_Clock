@@ -1,6 +1,8 @@
 package zelongames.travelarm_clock.Activities;
 
 import android.os.Bundle;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
@@ -27,8 +29,23 @@ public class AlarmCollectionActivity extends ToolbarCompatActivity {
         names.add(new Alarm("apa", "are"));
         names.add(new Alarm("apa", "are"));
         names.add(new Alarm("apa", "are"));
+        names.add(new Alarm("apa", "are"));
+        names.add(new Alarm("apa", "are"));
+        names.add(new Alarm("apa", "are"));
+        names.add(new Alarm("apa", "are"));
+        names.add(new Alarm("apa", "are"));
+        names.add(new Alarm("apa", "are"));
+        names.add(new Alarm("apa", "are"));
+        names.add(new Alarm("apa", "are"));
 
         AlarmListAdapter adapter = new AlarmListAdapter(this, R.layout.alarm_collection_list_layout, names);
         listView.setAdapter(adapter);
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+
+            }
+        });
     }
 }

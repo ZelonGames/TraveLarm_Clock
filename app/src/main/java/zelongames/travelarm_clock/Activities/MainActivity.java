@@ -138,6 +138,8 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
 
     }
 
+
+
     private void getDeviceLocation() {
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 

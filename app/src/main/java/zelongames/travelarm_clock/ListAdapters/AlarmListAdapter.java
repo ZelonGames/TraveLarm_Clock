@@ -20,6 +20,11 @@ public class AlarmListAdapter extends ArrayAdapter<Alarm> {
     private Context context;
     private int resource = 0;
 
+    private static class ViewHolder {
+        TextView name;
+        TextView location;
+    }
+
     public AlarmListAdapter(Context context, int resource, ArrayList<Alarm> objects) {
         super(context, resource, objects);
         this.context = context;
@@ -35,12 +40,14 @@ public class AlarmListAdapter extends ArrayAdapter<Alarm> {
         String name = getItem(position).getName();
         String location = getItem(position).getLocation();
 
-        TextView tvName = convertView.findViewById(R.id.alarmName);
-        tvName.setText(name);
+        ViewHolder holder = new ViewHolder();
+        holder.name = convertView.findViewById(R.id.alarmName);
 
-        TextView tvLocation = convertView.findViewById(R.id.alarmLocation);
-        tvLocation.setText(location);
+        holder.location = convertView.findViewById(R.id.alarmLocation);
+        convertView.setTag(holder);
 
         return convertView;
     }
+
+
 }
