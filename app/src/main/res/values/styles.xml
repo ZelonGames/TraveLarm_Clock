@@ -10,7 +10,29 @@
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorAccent">@color/colorSecondary</item>
+    </style>
+
+    <style name="buttonStyle" parent="@style/Widget.AppCompat.Button.Colored">
+        <item name="android:textColor">#fff</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:padding">20dp</item>
+    </style>
+
+    <style name="listviewStyle" parent="@style/Widget.AppCompat.ListView">
+        <item name="android:colorAccent">@color/colorSecondary</item>
+    </style>
+
+    <style name="SettingsTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorSecondary</item>
+
+        <item name="android:textColor">#fff</item>
+        <item name="android:textColorSecondary">#fff</item>
+        <item name="android:buttonStyle">@style/buttonStyle</item>
+        <item name="android:listViewStyle">@style/listviewStyle</item>
     </style>
 
 </resources>

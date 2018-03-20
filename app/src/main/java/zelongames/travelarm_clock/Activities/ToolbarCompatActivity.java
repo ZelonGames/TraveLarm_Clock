@@ -11,11 +11,15 @@ import zelongames.travelarm_clock.R;
 public class ToolbarCompatActivity extends AppCompatActivity {
 
     private int menuID = 0;
-    protected Toolbar toolbar = null;
+    private Toolbar toolbar = null;
 
-    protected void initializeToolBar(String title, int menuID, boolean displayBackButton){
+    protected Toolbar getToolbar() {
+        return toolbar;
+    }
+
+    protected void initializeToolBar(String title, int menuID, boolean displayBackButton) {
         this.menuID = menuID;
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle(title);
         getSupportActionBar().setDisplayHomeAsUpEnabled(displayBackButton);
@@ -30,7 +34,7 @@ public class ToolbarCompatActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case R.id.alarm:
                 Intent alarmCollectionIntent = new Intent(this, AlarmCollectionActivity.class);
                 startActivity(alarmCollectionIntent);

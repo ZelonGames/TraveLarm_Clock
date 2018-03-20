@@ -2,15 +2,24 @@ package zelongames.travelarm_clock.Activities;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlarmManager;
 import android.app.Dialog;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.location.LocationListener;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
@@ -43,9 +52,15 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
+import zelongames.travelarm_clock.Alarm;
+import zelongames.travelarm_clock.IntentExtras;
 import zelongames.travelarm_clock.PlaceAutocompleteAdapter;
 import zelongames.travelarm_clock.R;
 
@@ -62,6 +77,8 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
     private static final float ZOOM = 15;
 
     private boolean locationPermissionGranted = false;
+
+    private Thread thread = null;
 
     private AutoCompleteTextView searchText = null;
     private PlaceAutocompleteAdapter placeAutocompleteAdapter = null;
@@ -93,7 +110,7 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
         return true;
     }
 
-    private void init(){
+    private void init() {
         googleApiClient = new GoogleApiClient
                 .Builder(this)
                 .addApi(Places.GEO_DATA_API)
@@ -117,16 +134,29 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
         });
     }
 
-    private void geoLocate(){
+    public void onAddAlarm(View view) {
+    /*    RingtoneManager ringtoneMgr = new RingtoneManager(this);
+        Ringtone defaultRingtone = RingtoneManager.getRingtone(this,
+                Settings.System.DEFAULT_RINGTONE_URI);
+        defaultRingtone.play();*/
+
+        Alarm alarm = new Alarm(Alarm.currentLocationName, Alarm.currentLocation);
+        Intent intent = new Intent(this, AlarmCollectionActivity.class);
+        intent.putExtra("alarm", alarm);
+        startActivity(intent);
+    }
+
+    private void geoLocate() {
         String searchString = searchText.getText().toString();
 
         Geocoder geocoder = new Geocoder(this);
         List<Address> list = new ArrayList<>();
 
-        try{
+        try {
             list = geocoder.getFromLocationName(searchString, 1);
-        }catch (IOException e){
-
+        } catch (IOException e) {
+            Log.d("Exception: ", e.toString());
+            Toast.makeText(this, e.toString(), Toast.LENGTH_SHORT).show();
         }
 
         if (list.size() > 0) {
@@ -134,11 +164,11 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
 
             LatLng addressLocation = new LatLng(address.getLatitude(), address.getLongitude());
             moveCamera(addressLocation, ZOOM, address.getAddressLine(0));
+
+            Alarm.currentLocationName = address.getAddressLine(0);
+            Alarm.currentLocation = addressLocation;
         }
-
     }
-
-
 
     private void getDeviceLocation() {
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
@@ -250,9 +280,9 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
         }
     }
 
-    private void hideKeyboard(){
+    private void hideKeyboard() {
         //this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-        InputMethodManager inputMethodManager = (InputMethodManager)  getSystemService(Activity.INPUT_METHOD_SERVICE);
+        InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
         inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
     }
 
@@ -277,7 +307,7 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
     private ResultCallback<PlaceBuffer> updatePlaceDetailsCallback = new ResultCallback<PlaceBuffer>() {
         @Override
         public void onResult(@NonNull PlaceBuffer places) {
-            if (!places.getStatus().isSuccess()){
+            if (!places.getStatus().isSuccess()) {
                 places.release();
                 return;
             }

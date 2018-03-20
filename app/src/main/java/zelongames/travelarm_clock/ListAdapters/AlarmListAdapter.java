@@ -10,7 +10,6 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import zelongames.travelarm_clock.Alarm;
 import zelongames.travelarm_clock.R;
@@ -34,17 +33,29 @@ public class AlarmListAdapter extends ArrayAdapter<Alarm> {
     @NonNull
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-        LayoutInflater inflator = LayoutInflater.from(context);
-        convertView = inflator.inflate(resource, parent, false);
 
-        String name = getItem(position).getName();
-        String location = getItem(position).getLocation();
+        ViewHolder holder = null;
 
-        ViewHolder holder = new ViewHolder();
-        holder.name = convertView.findViewById(R.id.alarmName);
+        if (convertView == null) {
+            LayoutInflater inflator = LayoutInflater.from(context);
+            convertView = inflator.inflate(resource, parent, false);
 
-        holder.location = convertView.findViewById(R.id.alarmLocation);
-        convertView.setTag(holder);
+            holder = new ViewHolder();
+            holder.name = convertView.findViewById(R.id.alarmName);
+            holder.location = convertView.findViewById(R.id.alarmLocation);
+
+            convertView.setTag(holder);
+        } else
+            holder = (ViewHolder) convertView.getTag();
+
+        Alarm alarm = getItem(position);
+        if (alarm.hasName()) {
+            holder.name.setText(alarm.getName());
+            holder.location.setText(alarm.getLocationName());
+        } else {
+            holder.name.setText("...");
+            holder.location.setText(alarm.getLocationName());
+        }
 
         return convertView;
     }

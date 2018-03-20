@@ -28,7 +28,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".Activities.AlarmCollectionActivity"></activity>
+        <activity android:name=".Activities.AlarmCollectionActivity" />
+        <activity android:name=".Activities.SettingsActivity"
+            android:theme="@style/SettingsTheme"/>
     </application>
 
 </manifest>
