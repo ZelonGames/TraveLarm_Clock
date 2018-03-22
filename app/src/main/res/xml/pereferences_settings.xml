@@ -6,7 +6,8 @@
 
     <EditTextPreference
         android:key="alarmName"
-        android:title="Alarm Name" />
+        android:title="Alarm Name"
+        android:dialogTitle="Alarm Name"/>
 
     <Preference
         android:key="distance"
@@ -16,7 +17,8 @@
     <RingtonePreference
         android:key="alarm"
         android:title="Ringtone"
-        android:summary="tone" />
+        android:summary="tone"
+        android:ringtoneType="alarm"/>
 
     <SwitchPreference
         android:defaultValue="true"
@@ -27,5 +29,8 @@
         android:defaultValue="true"
         android:key="enabled"
         android:title="Enabled" />
+
+    <zelongames.travelarm_clock.CustomPreferences.SeekBarPreference
+        android:title="Volume"/>
 
 </PreferenceScreen>

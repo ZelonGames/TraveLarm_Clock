@@ -32,7 +32,6 @@ public class Alarm implements Parcelable{
     private boolean isEnabled = false;
 
     public Alarm(String locationName, LatLng location) {
-        this.name = name;
         this.locationName = locationName;
         this.location = location;
     }
