@@ -12,6 +12,7 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
+import android.location.LocationManager;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -50,6 +51,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -66,8 +68,9 @@ import zelongames.travelarm_clock.Alarm;
 import zelongames.travelarm_clock.IntentExtras;
 import zelongames.travelarm_clock.PlaceAutocompleteAdapter;
 import zelongames.travelarm_clock.R;
+import zelongames.travelarm_clock.StorageHelper;
 
-public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCallback, GoogleApiClient.OnConnectionFailedListener {
+public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener, GoogleApiClient.OnConnectionFailedListener {
     private static final int ERROR_DIALOG_REQUEST = 9001;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
 
@@ -82,6 +85,8 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
     private boolean locationPermissionGranted = false;
 
     private Thread thread = null;
+
+    public Alarm currentAlarm = null;
 
     private AutoCompleteTextView searchText = null;
     private PlaceAutocompleteAdapter placeAutocompleteAdapter = null;
@@ -106,23 +111,9 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
             getLocationPermission();
         }
 
-        AlertDialog.Builder builder;
-        builder = new AlertDialog.Builder(this);
-        builder.setTitle("Delete entry")
-                .setMessage("Are you sure you want to delete this entry?")
-                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        // continue with delete
-                    }
-                })
-                .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        // do nothing
-                    }
-                })
-                .setIcon(android.R.drawable.ic_dialog_alert)
-                .show();
+
     }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -160,10 +151,17 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
                 Settings.System.DEFAULT_RINGTONE_URI);
         defaultRingtone.play();*/
 
-        Alarm alarm = new Alarm(Alarm.currentLocationName, Alarm.currentLocation);
-        Intent intent = new Intent(this, AlarmCollectionActivity.class);
-        intent.putExtra("alarm", alarm);
-        startActivity(intent);
+        if (Alarm.currentLocationName.equals("")){
+            return;
+        }
+
+        MarkerOptions markerOptions = new MarkerOptions()
+                .position(Alarm.currentLocation)
+                .title(Alarm.currentLocationName);
+
+        Marker marker = gMap.addMarker(markerOptions);
+        Alarm alarm = new Alarm(marker.getTitle(), marker.getPosition());
+        StorageHelper.alarms.put(alarm.getName(), alarm);
     }
 
     private void geoLocate() {
@@ -216,14 +214,6 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
 
     private void moveCamera(LatLng latLng, float zoom, String title) {
         gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom));
-
-        if (!title.equals("")) {
-            MarkerOptions markerOptions = new MarkerOptions()
-                    .position(latLng)
-                    .title(title);
-
-            gMap.addMarker(markerOptions);
-        }
     }
 
     private void initMap() {
@@ -284,8 +274,12 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
+        if (gMap != null)
+            return;
+
         Toast.makeText(this, "Map is Ready", Toast.LENGTH_SHORT).show();
         gMap = googleMap;
+        gMap.setOnMarkerClickListener(this);
 
         if (locationPermissionGranted) {
             getDeviceLocation();
@@ -294,7 +288,7 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
                     PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 return;
             }
-            googleMap.setMyLocationEnabled(true);
+            gMap.setMyLocationEnabled(true);
 
             init();
         }
@@ -333,4 +327,15 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
             }
         }
     };
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        currentAlarm = StorageHelper.alarms.get(marker.getTitle());
+
+        Intent intent = new Intent(this, SettingsActivity.class);
+        intent.putExtra(IntentExtras.alarm, currentAlarm);
+        startActivity(intent);
+
+        return false;
+    }
 }

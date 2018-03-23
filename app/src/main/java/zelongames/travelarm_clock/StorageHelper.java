@@ -1,7 +1,8 @@
 package zelongames.travelarm_clock;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public final class StorageHelper {
-    public static ArrayList<Alarm> alarms = new ArrayList<>();
+    public static HashMap<String, Alarm> alarms = new HashMap<>();
 }

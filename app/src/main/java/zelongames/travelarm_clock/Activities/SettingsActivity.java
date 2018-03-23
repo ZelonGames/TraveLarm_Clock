@@ -18,19 +18,28 @@ import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
-import android.widget.LinearLayout;;import zelongames.travelarm_clock.R;
+import android.widget.LinearLayout;
+import android.widget.Toast;;import zelongames.travelarm_clock.Alarm;
+import zelongames.travelarm_clock.IntentExtras;
+import zelongames.travelarm_clock.R;
 import zelongames.travelarm_clock.SettingsFragment;
 
 
 public class SettingsActivity extends ToolbarCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     private Ringtone currentRingtone = null;
+    private Alarm currentAlarm = null;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.alarm_settings);
         initializeToolBar("Alarm Settings", R.menu.menu_toolbar_back, true);
+
+        if (getIntent().getExtras() != null) {
+            currentAlarm = getIntent().getExtras().getParcelable(IntentExtras.alarm);
+            Toast.makeText(this, currentAlarm.getLocationName(), Toast.LENGTH_SHORT).show();
+        }
 
         getFragmentManager().beginTransaction()
                 .replace(R.id.displayPrefs, new SettingsFragment())
@@ -44,16 +53,15 @@ public class SettingsActivity extends ToolbarCompatActivity implements SharedPre
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
-/*
-        if (currentRingtone != null)
-            currentRingtone.stop();
+
+        final String preferenceStringValue = sharedPreferences.getString(s, "");
 
         switch (s) {
             case "alarm":
-                Uri uri = Uri.parse(sharedPreferences.getString(s, ""));
+                Uri uri = Uri.parse(preferenceStringValue);
                 currentRingtone = RingtoneManager.getRingtone(SettingsActivity.this, uri);
-                currentRingtone.play();
+                currentAlarm.setRingTone(currentRingtone);
                 break;
-        }*/
+        }
     }
 }

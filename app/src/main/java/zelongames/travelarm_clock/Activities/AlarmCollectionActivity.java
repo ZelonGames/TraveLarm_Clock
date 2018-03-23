@@ -6,6 +6,9 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import zelongames.travelarm_clock.Alarm;
 import zelongames.travelarm_clock.IntentExtras;
 import zelongames.travelarm_clock.ListAdapters.AlarmListAdapter;
@@ -23,12 +26,7 @@ public class AlarmCollectionActivity extends ToolbarCompatActivity {
 
         ListView listView = (ListView) findViewById(R.id.alarmCollection);
 
-        if (getIntent().getExtras() != null) {
-            Alarm newAlarm = (Alarm) getIntent().getExtras().getParcelable(IntentExtras.alarm);
-            StorageHelper.alarms.add(newAlarm);
-        }
-
-        AlarmListAdapter adapter = new AlarmListAdapter(this, R.layout.alarm_collection_list_layout, StorageHelper.alarms);
+        AlarmListAdapter adapter = new AlarmListAdapter(this, R.layout.alarm_collection_list_layout, hashMapToArrayList(StorageHelper.alarms));
         listView.setAdapter(adapter);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -38,5 +36,15 @@ public class AlarmCollectionActivity extends ToolbarCompatActivity {
                 startActivity(intent);
             }
         });
+    }
+
+    private <T> ArrayList<T> hashMapToArrayList(HashMap<String, T> hashMap){
+        ArrayList<T> arrayList = new ArrayList<>();
+
+        for (T object : hashMap.values()){
+            arrayList.add(object);
+        }
+
+        return arrayList;
     }
 }
