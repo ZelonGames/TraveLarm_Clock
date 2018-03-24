@@ -1,34 +1,31 @@
 package zelongames.travelarm_clock.Activities;
 
-import android.app.Activity;
-import android.app.Fragment;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.preference.PreferenceFragmentCompat;
-import android.support.v7.widget.Toolbar;
-import android.util.Log;
-import android.util.TypedValue;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.Toast;;import zelongames.travelarm_clock.Alarm;
 import zelongames.travelarm_clock.IntentExtras;
 import zelongames.travelarm_clock.R;
 import zelongames.travelarm_clock.SettingsFragment;
+import zelongames.travelarm_clock.StorageHelper;
 
 
 public class SettingsActivity extends ToolbarCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
 
-    private Ringtone currentRingtone = null;
     private Alarm currentAlarm = null;
+
+    private Ringtone currentRingtone = null;
+    private String alarmName = null;
+
+    private Boolean vibrating = null;
+    private Boolean enabled = null;
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -38,7 +35,10 @@ public class SettingsActivity extends ToolbarCompatActivity implements SharedPre
 
         if (getIntent().getExtras() != null) {
             currentAlarm = getIntent().getExtras().getParcelable(IntentExtras.alarm);
-            Toast.makeText(this, currentAlarm.getLocationName(), Toast.LENGTH_SHORT).show();
+            String alarmName = currentAlarm.getName();
+            currentAlarm = StorageHelper.alarms.get(alarmName);
+
+            Toast.makeText(this, currentAlarm.getName(), Toast.LENGTH_SHORT).show();
         }
 
         getFragmentManager().beginTransaction()
@@ -54,14 +54,35 @@ public class SettingsActivity extends ToolbarCompatActivity implements SharedPre
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
 
-        final String preferenceStringValue = sharedPreferences.getString(s, "");
-
         switch (s) {
+            case "alarmName":
+                alarmName = sharedPreferences.getString(s, "");
+                break;
             case "alarm":
-                Uri uri = Uri.parse(preferenceStringValue);
+                Uri uri = Uri.parse(sharedPreferences.getString(s, ""));
                 currentRingtone = RingtoneManager.getRingtone(SettingsActivity.this, uri);
-                currentAlarm.setRingTone(currentRingtone);
+                break;
+            case "vibrate":
+                currentAlarm.vibrating = sharedPreferences.getBoolean(s, true);
+                break;
+            case "enabled":
+                currentAlarm.enabled = sharedPreferences.getBoolean(s, true);
                 break;
         }
+    }
+
+    public void onApplyChanges(View view) {
+        if (alarmName != null)
+            currentAlarm.setName(alarmName, StorageHelper.alarms);
+        if (currentRingtone != null)
+            currentAlarm.setRingtone(currentRingtone);
+        if (vibrating != null)
+            currentAlarm.vibrating = vibrating;
+        if (enabled != null)
+            currentAlarm.enabled = enabled;
+
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.putExtra(IntentExtras.alarm, currentAlarm);
+        startActivity(intent);
     }
 }

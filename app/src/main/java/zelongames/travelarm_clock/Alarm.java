@@ -8,24 +8,29 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+
+import java.util.HashMap;
 
 import zelongames.travelarm_clock.Activities.SettingsActivity;
 
-public class Alarm implements Parcelable{
+public class Alarm implements Parcelable {
 
     public static String currentAlarmName = "";
     public static String currentLocationName = "";
     public static LatLng currentLocation = null;
 
+    public Marker marker = null;
+
     public String ringtoneUriString = RingtoneManager.EXTRA_RINGTONE_DEFAULT_URI;
     private Ringtone ringtone = null;
 
-    public Ringtone getRingtone(Context context){
+    public Ringtone getRingtone(Context context) {
         Uri uri = Uri.parse(ringtoneUriString);
         return ringtone = RingtoneManager.getRingtone(context, uri);
     }
 
-    public void setRingTone(Ringtone ringtone){
+    public void setRingtone(Ringtone ringtone) {
         this.ringtone = ringtone;
     }
 
@@ -38,6 +43,14 @@ public class Alarm implements Parcelable{
             return name;
     }
 
+    public void setName(String name, HashMap<String, Alarm> alarmList) {
+        if (alarmList.containsKey(this.name))
+            alarmList.put(name, alarmList.remove(this.name));
+
+        this.name = name;
+        marker.setTitle(name);
+    }
+
     private String locationName = null;
 
     public String getLocationName() {
@@ -46,18 +59,16 @@ public class Alarm implements Parcelable{
 
     private LatLng location = null;
 
-    public boolean isEnabled() {
-        return isEnabled;
-    }
+    public boolean vibrating = false;
+    public boolean enabled = false;
 
-    private boolean isEnabled = false;
-
-    public Alarm(String locationName, LatLng location) {
+    public Alarm(String locationName, LatLng location, Marker marker) {
         this.locationName = locationName;
         this.location = location;
+        this.marker = marker;
     }
 
-    private Alarm(Parcel in){
+    private Alarm(Parcel in) {
         this.name = in.readString();
         this.locationName = in.readString();
         this.ringtoneUriString = in.readString();
@@ -87,11 +98,11 @@ public class Alarm implements Parcelable{
         parcel.writeString(ringtoneUriString);
     }
 
-    public static boolean canAddAlarm(){
+    public static boolean canAddAlarm() {
         return !currentLocationName.equals("");
     }
 
-    public boolean hasName(){
+    public boolean hasName() {
         return !getName().equals("");
     }
 }

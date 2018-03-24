@@ -39,6 +39,9 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.AutocompletePrediction;
 import com.google.android.gms.location.places.GeoDataClient;
@@ -54,6 +57,7 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
 import java.io.IOException;
@@ -84,7 +88,7 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
 
     private boolean locationPermissionGranted = false;
 
-    private Thread thread = null;
+    public HashMap<String, Marker> markers = new HashMap<>();
 
     public Alarm currentAlarm = null;
 
@@ -95,6 +99,8 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
     private Place place = null;
 
     private FusedLocationProviderClient fusedLocationProviderClient = null;
+    private LocationCallback locationCallback = null;
+    private LocationRequest locationRequest = null;
 
     private GoogleMap gMap = null;
 
@@ -107,13 +113,57 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
 
         searchText = (AutoCompleteTextView) findViewById(R.id.input_search);
 
-        if (isServiceOK()) {
-            getLocationPermission();
+        if (getIntent().getExtras() != null) {
+            currentAlarm = getIntent().getExtras().getParcelable(IntentExtras.alarm);
+            String alarmName = currentAlarm.getName();
+            currentAlarm = StorageHelper.alarms.get(alarmName);
         }
 
+        if (isServiceOK()) {
+            getLocationPermission();
+            initializeLocationRequest();
+            fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) ==
+                    PackageManager.PERMISSION_GRANTED) {
+                fusedLocationProviderClient.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+
+                    }
+                });
+            }
+
+            locationCallback = new LocationCallback() {
+                @Override
+                public void onLocationResult(LocationResult locationResult) {
+                    for (Location location : locationResult.getLocations()) {
+
+                    }
+                }
+            };
+        }
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        startLocationUpdates();
+    }
+
+    private void initializeLocationRequest() {
+        locationRequest = new LocationRequest();
+        locationRequest.setInterval(10000);
+        locationRequest.setFastestInterval(5000);
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+    }
+
+    private void startLocationUpdates() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) ==
+                PackageManager.PERMISSION_GRANTED)
+            fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, null);
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -146,12 +196,8 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
     }
 
     public void onAddAlarm(View view) {
-    /*    RingtoneManager ringtoneMgr = new RingtoneManager(this);
-        Ringtone defaultRingtone = RingtoneManager.getRingtone(this,
-                Settings.System.DEFAULT_RINGTONE_URI);
-        defaultRingtone.play();*/
-
-        if (Alarm.currentLocationName.equals("")){
+        if (Alarm.currentLocationName.equals("")) {
+            Toast.makeText(this, "You must search for a location before you can add an alarm!", Toast.LENGTH_LONG).show();
             return;
         }
 
@@ -160,8 +206,10 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
                 .title(Alarm.currentLocationName);
 
         Marker marker = gMap.addMarker(markerOptions);
-        Alarm alarm = new Alarm(marker.getTitle(), marker.getPosition());
+        Alarm alarm = new Alarm(marker.getTitle(), marker.getPosition(), marker);
         StorageHelper.alarms.put(alarm.getName(), alarm);
+
+        Toast.makeText(this, "New alarm created at: " + alarm.getLocationName() + ".", Toast.LENGTH_SHORT).show();
     }
 
     private void geoLocate() {
@@ -189,7 +237,7 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
     }
 
     private void getDeviceLocation() {
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+
 
         try {
             if (locationPermissionGranted) {
@@ -211,6 +259,7 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
 
         }
     }
+
 
     private void moveCamera(LatLng latLng, float zoom, String title) {
         gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom));
@@ -280,6 +329,11 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
         Toast.makeText(this, "Map is Ready", Toast.LENGTH_SHORT).show();
         gMap = googleMap;
         gMap.setOnMarkerClickListener(this);
+
+        for (Alarm alarm : StorageHelper.alarms.values()) {
+            Marker marker = alarm.marker;
+            alarm.marker = gMap.addMarker(new MarkerOptions().title(marker.getTitle()).position(marker.getPosition()));
+        }
 
         if (locationPermissionGranted) {
             getDeviceLocation();
