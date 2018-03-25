@@ -22,7 +22,7 @@ public class SettingsActivity extends ToolbarCompatActivity implements SharedPre
 
     private Ringtone currentRingtone = null;
     private String alarmName = null;
-
+    private Integer distance = null;
     private Boolean vibrating = null;
     private Boolean enabled = null;
 
@@ -58,6 +58,9 @@ public class SettingsActivity extends ToolbarCompatActivity implements SharedPre
             case "alarmName":
                 alarmName = sharedPreferences.getString(s, "");
                 break;
+            case "distancePicker":
+                distance = sharedPreferences.getInt(s, 200);
+                break;
             case "alarm":
                 Uri uri = Uri.parse(sharedPreferences.getString(s, ""));
                 currentRingtone = RingtoneManager.getRingtone(SettingsActivity.this, uri);
@@ -67,6 +70,8 @@ public class SettingsActivity extends ToolbarCompatActivity implements SharedPre
                 break;
             case "enabled":
                 currentAlarm.enabled = sharedPreferences.getBoolean(s, true);
+                break;
+            default:
                 break;
         }
     }

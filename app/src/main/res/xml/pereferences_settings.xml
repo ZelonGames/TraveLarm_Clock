@@ -10,10 +10,9 @@
         android:dialogTitle="Alarm Name"
         android:textColor="#fff"/>
 
-    <Preference
-        android:key="distance"
+    <zelongames.travelarm_clock.CustomPreferences.DistancePickerPreference
+        android:key="distancePicker"
         android:title="Distance" />
-
 
     <RingtonePreference
         android:key="alarm"
@@ -32,6 +31,7 @@
         android:title="Enabled" />
 
     <zelongames.travelarm_clock.CustomPreferences.SeekBarPreference
+        android:key="volume"
         android:title="Volume"/>
 
 </PreferenceScreen>
