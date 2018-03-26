@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -52,6 +53,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
@@ -113,11 +115,7 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
 
         searchText = (AutoCompleteTextView) findViewById(R.id.input_search);
 
-        if (getIntent().getExtras() != null) {
-            currentAlarm = getIntent().getExtras().getParcelable(IntentExtras.alarm);
-            String alarmName = currentAlarm.getName();
-            currentAlarm = StorageHelper.alarms.get(alarmName);
-        }
+        setCurrentAlarm();
 
         if (isServiceOK()) {
             getLocationPermission();
@@ -134,15 +132,33 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
                 });
             }
 
-            locationCallback = new LocationCallback() {
-                @Override
-                public void onLocationResult(LocationResult locationResult) {
-                    for (Location location : locationResult.getLocations()) {
+            updateLocation();
+        }
+    }
 
+    private void setCurrentAlarm(){
+        if (getIntent().getExtras() != null) {
+            currentAlarm = getIntent().getExtras().getParcelable(IntentExtras.alarm);
+            if (!currentAlarm.enabled)
+                currentAlarm = null;
+            else {
+                String alarmName = currentAlarm.getName();
+                currentAlarm = StorageHelper.alarms.get(alarmName);
+            }
+        }
+    }
+
+    private void updateLocation() {
+        locationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                for (Location location : locationResult.getLocations()) {
+                    if (currentAlarm != null) {
+                        currentAlarm.updateAlarm(MainActivity.this, location);
                     }
                 }
-            };
-        }
+            }
+        };
     }
 
     @Override
@@ -209,6 +225,8 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
         Alarm alarm = new Alarm(marker.getTitle(), marker.getPosition(), marker);
         StorageHelper.alarms.put(alarm.getName(), alarm);
 
+        createCircleAroundAlarm(alarm);
+
         Toast.makeText(this, "New alarm created at: " + alarm.getLocationName() + ".", Toast.LENGTH_SHORT).show();
     }
 
@@ -237,8 +255,6 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
     }
 
     private void getDeviceLocation() {
-
-
         try {
             if (locationPermissionGranted) {
                 Task location = fusedLocationProviderClient.getLastLocation();
@@ -333,6 +349,7 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
         for (Alarm alarm : StorageHelper.alarms.values()) {
             Marker marker = alarm.marker;
             alarm.marker = gMap.addMarker(new MarkerOptions().title(marker.getTitle()).position(marker.getPosition()));
+            createCircleAroundAlarm(alarm);
         }
 
         if (locationPermissionGranted) {
@@ -346,6 +363,16 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
 
             init();
         }
+    }
+
+    private void createCircleAroundAlarm(Alarm alarm){
+        CircleOptions circleOptions = new CircleOptions()
+                .center(alarm.getLocation())
+                .radius(alarm.distanceInMeters)
+                .fillColor(R.color.colorPrimaryLight)
+                .strokeWidth(0);
+
+        gMap.addCircle(circleOptions);
     }
 
     private void hideKeyboard() {
