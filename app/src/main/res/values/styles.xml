@@ -26,7 +26,7 @@
     <style name="AlertDialogTheme" parent="@android:style/Theme.Material.Dialog">
         <item name="android:background">#000</item>
         <item name="android:colorAccent">@color/colorSecondary</item>
-        <item name="android:textColor">@color/colorSecondary</item>
+        <item name="android:textColor">#fff</item>
         <item name="android:windowMinWidthMajor">90%</item>
         <item name="android:windowMinWidthMinor">90%</item>
     </style>

@@ -2,28 +2,18 @@ package zelongames.travelarm_clock.Activities;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.AlarmManager;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
-import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
-import android.media.Ringtone;
-import android.media.RingtoneManager;
-import android.net.Uri;
-import android.os.Build;
-import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.os.Bundle;
-import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -63,14 +53,12 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
 import java.io.IOException;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 
 import zelongames.travelarm_clock.Alarm;
+import zelongames.travelarm_clock.DialogHelper;
 import zelongames.travelarm_clock.IntentExtras;
 import zelongames.travelarm_clock.PlaceAutocompleteAdapter;
 import zelongames.travelarm_clock.R;
@@ -136,7 +124,7 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
         }
     }
 
-    private void setCurrentAlarm(){
+    private void setCurrentAlarm() {
         if (getIntent().getExtras() != null) {
             currentAlarm = getIntent().getExtras().getParcelable(IntentExtras.alarm);
             if (!currentAlarm.enabled)
@@ -205,29 +193,43 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
             @Override
             public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
                 hideKeyboard();
-                geoLocate();
+                addAlarm();
                 return false;
             }
         });
     }
 
-    public void onAddAlarm(View view) {
-        if (Alarm.currentLocationName.equals("")) {
-            Toast.makeText(this, "You must search for a location before you can add an alarm!", Toast.LENGTH_LONG).show();
-            return;
-        }
+    private void addAlarm() {
+        geoLocate();
 
-        MarkerOptions markerOptions = new MarkerOptions()
+        if (Alarm.currentLocation == null)
+            return;
+
+        final MarkerOptions markerOptions = new MarkerOptions()
                 .position(Alarm.currentLocation)
                 .title(Alarm.currentLocationName);
 
-        Marker marker = gMap.addMarker(markerOptions);
-        Alarm alarm = new Alarm(marker.getTitle(), marker.getPosition(), marker);
-        StorageHelper.alarms.put(alarm.getName(), alarm);
+        DialogHelper.createPositiveNegativeDialog(this, "New Alarm",
+                "Are you sure you want to create an alarm at: " + markerOptions.getTitle() + "?",
+                "Yes", "No", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        Marker marker = gMap.addMarker(markerOptions);
+                        Alarm alarm = new Alarm(markerOptions.getTitle(), markerOptions.getPosition(), marker);
+                        StorageHelper.alarms.put(alarm.getName(), alarm);
 
-        createCircleAroundAlarm(alarm);
+                        createCircleAroundAlarm(alarm);
 
-        Toast.makeText(this, "New alarm created at: " + alarm.getLocationName() + ".", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, "New alarm created at: " + alarm.getLocationName() + ".", Toast.LENGTH_SHORT).show();
+                    }
+                }, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.dismiss();
+                    }
+                }).show();
+
+        Alarm.resetCurrentValues();
     }
 
     private void geoLocate() {
@@ -251,7 +253,8 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
 
             Alarm.currentLocationName = address.getAddressLine(0);
             Alarm.currentLocation = addressLocation;
-        }
+        } else
+            Toast.makeText(this, "Could not find your desired location.", Toast.LENGTH_SHORT).show();
     }
 
     private void getDeviceLocation() {
@@ -365,7 +368,7 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
         }
     }
 
-    private void createCircleAroundAlarm(Alarm alarm){
+    private void createCircleAroundAlarm(Alarm alarm) {
         CircleOptions circleOptions = new CircleOptions()
                 .center(alarm.getLocation())
                 .radius(alarm.distanceInMeters)
@@ -390,7 +393,7 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
         @Override
         public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
             hideKeyboard();
-            geoLocate();
+            addAlarm();
             final AutocompletePrediction item = placeAutocompleteAdapter.getItem(i);
             final String placeID = item.getPlaceId();
 

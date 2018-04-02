@@ -21,6 +21,7 @@ public class SettingsActivity extends ToolbarCompatActivity implements SharedPre
     private Alarm currentAlarm = null;
 
     private Ringtone currentRingtone = null;
+    private String ringtoneUriString = null;
     private String alarmName = null;
     private Integer distance = null;
     private Boolean vibrating = null;
@@ -62,8 +63,9 @@ public class SettingsActivity extends ToolbarCompatActivity implements SharedPre
                 distance = sharedPreferences.getInt(s, 200);
                 break;
             case "alarm":
-                Uri uri = Uri.parse(sharedPreferences.getString(s, ""));
-                currentRingtone = RingtoneManager.getRingtone(SettingsActivity.this, uri);
+                ringtoneUriString = sharedPreferences.getString(s, "");
+                //Uri uri = Uri.parse(sharedPreferences.getString(s, ""));
+                //currentRingtone = RingtoneManager.getRingtone(SettingsActivity.this, uri);
                 break;
             case "vibrate":
                 vibrating = sharedPreferences.getBoolean(s, true);
@@ -81,8 +83,8 @@ public class SettingsActivity extends ToolbarCompatActivity implements SharedPre
             currentAlarm.setName(alarmName, StorageHelper.alarms);
         if (distance != null)
             currentAlarm.distanceInMeters = distance;
-        if (currentRingtone != null)
-            currentAlarm.setRingtone(currentRingtone);
+        if (ringtoneUriString != null)
+            currentAlarm.ringtoneUriString = ringtoneUriString;
         if (vibrating != null)
             currentAlarm.vibrating = vibrating;
         currentAlarm.enabled = enabled;
