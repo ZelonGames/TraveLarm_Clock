@@ -4,12 +4,18 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.location.LocationManager;
+import android.os.Build;
+import android.preference.DialogPreference;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -59,6 +65,7 @@ import java.util.List;
 
 import zelongames.travelarm_clock.Alarm;
 import zelongames.travelarm_clock.DialogHelper;
+import zelongames.travelarm_clock.GPS_Service;
 import zelongames.travelarm_clock.IntentExtras;
 import zelongames.travelarm_clock.PlaceAutocompleteAdapter;
 import zelongames.travelarm_clock.R;
@@ -67,6 +74,7 @@ import zelongames.travelarm_clock.StorageHelper;
 public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener, GoogleApiClient.OnConnectionFailedListener {
     private static final int ERROR_DIALOG_REQUEST = 9001;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
+    private static final int GPS_SERVICE_PERMISSION_REQUEST_CODE = 2;
 
     private static final String FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
     private static final String COARSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
@@ -82,6 +90,8 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
 
     public Alarm currentAlarm = null;
 
+    private BroadcastReceiver broadcastReceiver = null;
+    private LatLng recievedLocation = null;
     private AutoCompleteTextView searchText = null;
     private PlaceAutocompleteAdapter placeAutocompleteAdapter = null;
     private GoogleApiClient googleApiClient = null;
@@ -101,32 +111,21 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
 
         initializeToolBar("TraveLarm Clock", R.menu.menu_toolbar_main, false);
 
-        searchText = (AutoCompleteTextView) findViewById(R.id.input_search);
+        searchText = findViewById(R.id.input_search);
 
-        setCurrentAlarm();
+        setCurrentAlarm(getIntent(), currentAlarm);
 
         if (isServiceOK()) {
             getLocationPermission();
             initializeLocationRequest();
             fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
-
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) ==
-                    PackageManager.PERMISSION_GRANTED) {
-                fusedLocationProviderClient.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
-                    @Override
-                    public void onSuccess(Location location) {
-
-                    }
-                });
-            }
-
             updateLocation();
         }
     }
 
-    private void setCurrentAlarm() {
-        if (getIntent().getExtras() != null) {
-            currentAlarm = getIntent().getExtras().getParcelable(IntentExtras.alarm);
+    public static void setCurrentAlarm(Intent intent, Alarm currentAlarm) {
+        if (intent.getExtras() != null) {
+            currentAlarm = intent.getExtras().getParcelable(IntentExtras.alarm);
             if (!currentAlarm.enabled)
                 currentAlarm = null;
             else {
@@ -141,9 +140,9 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
             @Override
             public void onLocationResult(LocationResult locationResult) {
                 for (Location location : locationResult.getLocations()) {
-                    if (currentAlarm != null) {
+                    /*if (currentAlarm != null) {
                         currentAlarm.updateAlarm(MainActivity.this, location);
-                    }
+                    }*/
                 }
             }
         };
@@ -153,13 +152,40 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
     protected void onResume() {
         super.onResume();
 
+        if (broadcastReceiver == null){
+            broadcastReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    double recievedLongitude = (double)intent.getExtras().get(IntentExtras.longitude);
+                    double recievedLatitude = (double)intent.getExtras().get(IntentExtras.latitude);
+                    recievedLocation = new LatLng(recievedLongitude, recievedLatitude);
+
+                    if (currentAlarm != null) {
+                        Location location = new Location("location");
+                        location.setLongitude(recievedLongitude);
+                        location.setLatitude(recievedLatitude);
+                        currentAlarm.updateAlarm(MainActivity.this, location);
+                    }
+                }
+            };
+        }
+        registerReceiver(broadcastReceiver, new IntentFilter(IntentExtras.locationUpdates));
+
         startLocationUpdates();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        if (broadcastReceiver != null)
+            unregisterReceiver(broadcastReceiver);
     }
 
     private void initializeLocationRequest() {
         locationRequest = new LocationRequest();
-        locationRequest.setInterval(10000);
-        locationRequest.setFastestInterval(5000);
+        locationRequest.setInterval(1000);
+        locationRequest.setFastestInterval(500);
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
 
@@ -320,12 +346,24 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
             ActivityCompat.requestPermissions(this, permissions, LOCATION_PERMISSION_REQUEST_CODE);
     }
 
+    public void startGPS_Service(){
+        Intent gpsService = new Intent(this, GPS_Service.class);
+        gpsService.putExtra(IntentExtras.alarm, currentAlarm);
+        startService(gpsService);
+    }
+
+    private void stopGPS_Service(){
+        Intent gpsService = new Intent(this, GPS_Service.class);
+        stopService(gpsService);
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         locationPermissionGranted = false;
 
         switch (requestCode) {
             case LOCATION_PERMISSION_REQUEST_CODE:
+
                 if (grantResults.length > 0) {
                     for (int i = 0; i < grantResults.length; i++) {
                         if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
@@ -336,7 +374,9 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
 
                     locationPermissionGranted = true;
                     initMap();
+                    //startGPS_Service();
                 }
+                break;
         }
     }
 

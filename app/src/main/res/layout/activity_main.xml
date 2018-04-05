@@ -38,7 +38,6 @@
                 android:layout_marginLeft="10dp"
                 android:src="@drawable/ic_magnify" />
 
-
             <AutoCompleteTextView
                 android:id="@+id/input_search"
                 android:layout_width="match_parent"
@@ -47,12 +46,12 @@
                 android:layout_centerVertical="true"
                 android:layout_toRightOf="@id/ic_magnify"
                 android:background="@null"
-                android:hint="Search for a location to create an alarm"
+                android:hint="Search for a location"
                 android:imeOptions="actionSearch"
                 android:inputType="text"
                 android:maxLines="2"
                 android:textColor="#000"
-                android:textSize="16sp" />
+                android:textSize="18sp" />
 
         </RelativeLayout>
     </RelativeLayout>

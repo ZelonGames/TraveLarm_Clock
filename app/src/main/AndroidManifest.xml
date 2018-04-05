@@ -31,6 +31,8 @@
         <activity android:name=".Activities.AlarmCollectionActivity" />
         <activity android:name=".Activities.SettingsActivity"
             android:theme="@style/SettingsTheme"/>
+
+        <service android:name=".GPS_Service"/>
     </application>
 
 </manifest>

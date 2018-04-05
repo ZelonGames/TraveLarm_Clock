@@ -1,6 +1,7 @@
 package zelongames.travelarm_clock;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.location.Location;
@@ -15,13 +16,15 @@ import com.google.android.gms.maps.model.Marker;
 
 import java.util.HashMap;
 
+import zelongames.travelarm_clock.Activities.MainActivity;
+
 public class Alarm implements Parcelable {
 
     public static String currentAlarmName = "";
     public static String currentLocationName = "";
     public static LatLng currentLocation = null;
 
-    public static void resetCurrentValues(){
+    public static void resetCurrentValues() {
         currentLocationName = null;
         currentLocation = null;
     }
@@ -29,7 +32,7 @@ public class Alarm implements Parcelable {
     public Marker marker = null;
 
     public String ringtoneUriString = RingtoneManager.EXTRA_RINGTONE_DEFAULT_URI;
-    private Ringtone ringtone = null;
+    public Ringtone ringtone = null;
 
     public Ringtone setRingtone(Context context) {
         Uri uri = Uri.parse(ringtoneUriString);
@@ -84,32 +87,34 @@ public class Alarm implements Parcelable {
     }
 
     public void updateAlarm(final Context context, Location location) {
-        if (!enabled)
+        if (!enabled || (ringtone != null && ringtone.isPlaying()))
             return;
 
         final float[] results = new float[1];
         Location.distanceBetween(location.getLatitude(), location.getLongitude(), getLocation().latitude, getLocation().longitude, results);
-        if (results[0] <= distanceInMeters) {
+        if (ringtone == null)
             setRingtone(context);
-            ringtone.play();
+        if (results[0] <= distanceInMeters) {
             showDialog(context);
-            enabled = false;
+            ringtone.play();
         }
     }
 
-    private void showDialog(final Context context) {
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
-        alertDialogBuilder.setMessage("Wake up!").setTitle(getName());
+    public void showDialog(Context context) {
 
-        alertDialogBuilder.setNeutralButton("Stop", new DialogInterface.OnClickListener() {
+        AlertDialog.Builder dialogBuilder = DialogHelper.createDialogBuilder(context, "Alarm", "Wake up!");
+
+        dialogBuilder.setNeutralButton("Stop", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 ringtone.stop();
                 dialog.dismiss();
+                enabled = false;
+                ringtone = null;
             }
         });
 
-        AlertDialog dialog = alertDialogBuilder.create();
+        Dialog dialog = dialogBuilder.create();
         dialog.show();
     }
 
@@ -132,8 +137,8 @@ public class Alarm implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeString(name);
-        parcel.writeString(locationName);
+        parcel.writeString(getName());
+        parcel.writeString(getLocationName());
         parcel.writeString(ringtoneUriString);
         parcel.writeByte(booleanToByte(vibrating));
         parcel.writeByte(booleanToByte(enabled));

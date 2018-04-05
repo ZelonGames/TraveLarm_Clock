@@ -10,6 +10,7 @@ import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.view.View;
 import android.widget.Toast;;import zelongames.travelarm_clock.Alarm;
+import zelongames.travelarm_clock.GPS_Service;
 import zelongames.travelarm_clock.IntentExtras;
 import zelongames.travelarm_clock.R;
 import zelongames.travelarm_clock.SettingsFragment;
@@ -89,8 +90,15 @@ public class SettingsActivity extends ToolbarCompatActivity implements SharedPre
             currentAlarm.vibrating = vibrating;
         currentAlarm.enabled = enabled;
 
+        startGPS_Service();
+
         Intent intent = new Intent(this, MainActivity.class);
         intent.putExtra(IntentExtras.alarm, currentAlarm);
         startActivity(intent);
+    }
+
+    public void startGPS_Service(){
+        Intent gpsService = new Intent(this, GPS_Service.class);
+        startService(gpsService);
     }
 }
