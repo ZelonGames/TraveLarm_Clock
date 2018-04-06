@@ -76,27 +76,22 @@ import zelongames.travelarm_clock.StorageHelper;
 public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener, GoogleApiClient.OnConnectionFailedListener {
     private static final int ERROR_DIALOG_REQUEST = 9001;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
-    private static final int GPS_SERVICE_PERMISSION_REQUEST_CODE = 2;
-
     private static final String FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
     private static final String COARSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
 
     private static final LatLngBounds LAT_LNG_BOUNDS = new LatLngBounds(
             new LatLng(-40, -160), new LatLng(71, 136));
 
-    private static final float ZOOM = 15;
 
     private boolean locationPermissionGranted = false;
 
     public Alarm currentAlarm = null;
 
     private BroadcastReceiver broadcastReceiver = null;
-    private LatLng recievedLocation = null;
     private AutoCompleteTextView searchText = null;
     private PlaceAutocompleteAdapter placeAutocompleteAdapter = null;
     private GoogleApiClient googleApiClient = null;
     private GeoDataClient geoDataClient = null;
-    private Place place = null;
 
     private GPS gps = null;
 
@@ -146,7 +141,6 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
                 public void onReceive(Context context, Intent intent) {
                     double recievedLongitude = (double) intent.getExtras().get(IntentExtras.longitude);
                     double recievedLatitude = (double) intent.getExtras().get(IntentExtras.latitude);
-                    recievedLocation = new LatLng(recievedLongitude, recievedLatitude);
 
                     if (currentAlarm != null) {
                         Location location = new Location("location");
@@ -165,7 +159,7 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
         }
         registerReceiver(broadcastReceiver, new IntentFilter(IntentExtras.locationUpdates));
 
-        gps.removeLocationUpdates();
+        gps.startLocationUpdates(this);
     }
 
     @Override
