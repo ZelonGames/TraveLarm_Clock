@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.drm.DrmStore;
 import android.location.Location;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
@@ -32,12 +33,13 @@ public class Alarm implements Parcelable {
     public Marker marker = null;
 
     public String ringtoneUriString = RingtoneManager.EXTRA_RINGTONE_DEFAULT_URI;
-    public Ringtone ringtone = null;
-
+    private Ringtone ringtone = null;
     public Ringtone setRingtone(Context context) {
         Uri uri = Uri.parse(ringtoneUriString);
         return ringtone = RingtoneManager.getRingtone(context, uri);
     }
+
+    private Dialog dialog = null;
 
     private String name = "";
 
@@ -72,6 +74,12 @@ public class Alarm implements Parcelable {
     public boolean vibrating = false;
     public boolean enabled = false;
 
+    private boolean isRunning = false;
+
+    public boolean getIsRunning(){
+        return isRunning;
+    }
+
     public Alarm(String locationName, LatLng location, Marker marker) {
         this.locationName = locationName;
         this.location = location;
@@ -95,12 +103,19 @@ public class Alarm implements Parcelable {
         if (ringtone == null)
             setRingtone(context);
         if (results[0] <= distanceInMeters) {
-            showDialog(context);
-            ringtone.play();
+            isRunning = true;
         }
     }
 
-    public void showDialog(Context context) {
+    public void run(Context context){
+        //showDialog(context);
+        ringtone.play();
+        isRunning = false;
+    }
+
+    private void createDialog(Context context) {
+        if (dialog != null)
+            return;
 
         AlertDialog.Builder dialogBuilder = DialogHelper.createDialogBuilder(context, "Alarm", "Wake up!");
 
@@ -114,7 +129,11 @@ public class Alarm implements Parcelable {
             }
         });
 
-        Dialog dialog = dialogBuilder.create();
+        dialog = dialogBuilder.create();
+    }
+
+    public void showDialog(Context context){
+        createDialog(context);
         dialog.show();
     }
 

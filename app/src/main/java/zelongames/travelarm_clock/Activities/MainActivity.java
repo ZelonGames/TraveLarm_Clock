@@ -65,8 +65,10 @@ import java.util.List;
 
 import zelongames.travelarm_clock.Alarm;
 import zelongames.travelarm_clock.DialogHelper;
+import zelongames.travelarm_clock.GPS;
 import zelongames.travelarm_clock.GPS_Service;
 import zelongames.travelarm_clock.IntentExtras;
+import zelongames.travelarm_clock.MapHelper;
 import zelongames.travelarm_clock.PlaceAutocompleteAdapter;
 import zelongames.travelarm_clock.R;
 import zelongames.travelarm_clock.StorageHelper;
@@ -86,8 +88,6 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
 
     private boolean locationPermissionGranted = false;
 
-    public HashMap<String, Marker> markers = new HashMap<>();
-
     public Alarm currentAlarm = null;
 
     private BroadcastReceiver broadcastReceiver = null;
@@ -98,9 +98,7 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
     private GeoDataClient geoDataClient = null;
     private Place place = null;
 
-    private FusedLocationProviderClient fusedLocationProviderClient = null;
-    private LocationCallback locationCallback = null;
-    private LocationRequest locationRequest = null;
+    private GPS gps = null;
 
     private GoogleMap gMap = null;
 
@@ -117,9 +115,12 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
 
         if (isServiceOK()) {
             getLocationPermission();
-            initializeLocationRequest();
-            fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
-            updateLocation();
+            gps = new GPS(this, new LocationCallback(){
+                @Override
+                public void onLocationResult(LocationResult locationResult) {
+                    super.onLocationResult(locationResult);
+                }
+            }, false);
         }
     }
 
@@ -135,29 +136,16 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
         }
     }
 
-    private void updateLocation() {
-        locationCallback = new LocationCallback() {
-            @Override
-            public void onLocationResult(LocationResult locationResult) {
-                for (Location location : locationResult.getLocations()) {
-                    /*if (currentAlarm != null) {
-                        currentAlarm.updateAlarm(MainActivity.this, location);
-                    }*/
-                }
-            }
-        };
-    }
-
     @Override
     protected void onResume() {
         super.onResume();
 
-        if (broadcastReceiver == null){
+        if (broadcastReceiver == null) {
             broadcastReceiver = new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {
-                    double recievedLongitude = (double)intent.getExtras().get(IntentExtras.longitude);
-                    double recievedLatitude = (double)intent.getExtras().get(IntentExtras.latitude);
+                    double recievedLongitude = (double) intent.getExtras().get(IntentExtras.longitude);
+                    double recievedLatitude = (double) intent.getExtras().get(IntentExtras.latitude);
                     recievedLocation = new LatLng(recievedLongitude, recievedLatitude);
 
                     if (currentAlarm != null) {
@@ -165,13 +153,19 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
                         location.setLongitude(recievedLongitude);
                         location.setLatitude(recievedLatitude);
                         currentAlarm.updateAlarm(MainActivity.this, location);
+                        if (currentAlarm.getIsRunning()) {
+                            Intent mainIntent = getIntent();
+                            finish();
+                            mainIntent.putExtra("", currentAlarm);
+                            startActivity(mainIntent);
+                        }
                     }
                 }
             };
         }
         registerReceiver(broadcastReceiver, new IntentFilter(IntentExtras.locationUpdates));
 
-        startLocationUpdates();
+        gps.removeLocationUpdates();
     }
 
     @Override
@@ -180,19 +174,6 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
 
         if (broadcastReceiver != null)
             unregisterReceiver(broadcastReceiver);
-    }
-
-    private void initializeLocationRequest() {
-        locationRequest = new LocationRequest();
-        locationRequest.setInterval(1000);
-        locationRequest.setFastestInterval(500);
-        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-    }
-
-    private void startLocationUpdates() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) ==
-                PackageManager.PERMISSION_GRANTED)
-            fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, null);
     }
 
     @Override
@@ -226,7 +207,7 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
     }
 
     private void addAlarm() {
-        geoLocate();
+        gps.geoLocate(this, gMap,  searchText);
 
         if (Alarm.currentLocation == null)
             return;
@@ -244,7 +225,7 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
                         Alarm alarm = new Alarm(markerOptions.getTitle(), markerOptions.getPosition(), marker);
                         StorageHelper.alarms.put(alarm.getName(), alarm);
 
-                        createCircleAroundAlarm(alarm);
+                        MapHelper.createCircleAroundAlarm(gMap, alarm);
 
                         Toast.makeText(MainActivity.this, "New alarm created at: " + alarm.getLocationName() + ".", Toast.LENGTH_SHORT).show();
                     }
@@ -256,58 +237,6 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
                 }).show();
 
         Alarm.resetCurrentValues();
-    }
-
-    private void geoLocate() {
-        String searchString = searchText.getText().toString();
-
-        Geocoder geocoder = new Geocoder(this);
-        List<Address> list = new ArrayList<>();
-
-        try {
-            list = geocoder.getFromLocationName(searchString, 1);
-        } catch (IOException e) {
-            Log.d("Exception: ", e.toString());
-            Toast.makeText(this, e.toString(), Toast.LENGTH_SHORT).show();
-        }
-
-        if (list.size() > 0) {
-            Address address = list.get(0);
-
-            LatLng addressLocation = new LatLng(address.getLatitude(), address.getLongitude());
-            moveCamera(addressLocation, ZOOM, address.getAddressLine(0));
-
-            Alarm.currentLocationName = address.getAddressLine(0);
-            Alarm.currentLocation = addressLocation;
-        } else
-            Toast.makeText(this, "Could not find your desired location.", Toast.LENGTH_SHORT).show();
-    }
-
-    private void getDeviceLocation() {
-        try {
-            if (locationPermissionGranted) {
-                Task location = fusedLocationProviderClient.getLastLocation();
-                location.addOnCompleteListener(new OnCompleteListener() {
-                    @Override
-                    public void onComplete(@NonNull Task task) {
-                        if (task.isSuccessful()) {
-                            Location currentLocation = (Location) task.getResult();
-
-                            moveCamera(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()), ZOOM, "");
-                        } else {
-                            Toast.makeText(MainActivity.this, "Unable to get your current location", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
-            }
-        } catch (SecurityException e) {
-
-        }
-    }
-
-
-    private void moveCamera(LatLng latLng, float zoom, String title) {
-        gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom));
     }
 
     private void initMap() {
@@ -346,13 +275,13 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
             ActivityCompat.requestPermissions(this, permissions, LOCATION_PERMISSION_REQUEST_CODE);
     }
 
-    public void startGPS_Service(){
+    public void startGPS_Service() {
         Intent gpsService = new Intent(this, GPS_Service.class);
         gpsService.putExtra(IntentExtras.alarm, currentAlarm);
         startService(gpsService);
     }
 
-    private void stopGPS_Service(){
+    private void stopGPS_Service() {
         Intent gpsService = new Intent(this, GPS_Service.class);
         stopService(gpsService);
     }
@@ -392,11 +321,11 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
         for (Alarm alarm : StorageHelper.alarms.values()) {
             Marker marker = alarm.marker;
             alarm.marker = gMap.addMarker(new MarkerOptions().title(marker.getTitle()).position(marker.getPosition()));
-            createCircleAroundAlarm(alarm);
+            MapHelper.createCircleAroundAlarm(gMap, alarm);
         }
 
         if (locationPermissionGranted) {
-            getDeviceLocation();
+            gps.getDeviceLocation(gMap, this, locationPermissionGranted);
 
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) !=
                     PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -406,16 +335,6 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
 
             init();
         }
-    }
-
-    private void createCircleAroundAlarm(Alarm alarm) {
-        CircleOptions circleOptions = new CircleOptions()
-                .center(alarm.getLocation())
-                .radius(alarm.distanceInMeters)
-                .fillColor(R.color.colorPrimaryLight)
-                .strokeWidth(0);
-
-        gMap.addCircle(circleOptions);
     }
 
     private void hideKeyboard() {

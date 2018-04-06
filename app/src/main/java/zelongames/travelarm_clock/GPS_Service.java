@@ -20,20 +20,35 @@ import com.google.android.gms.location.LocationServices;
 import zelongames.travelarm_clock.Activities.MainActivity;
 
 public class GPS_Service extends Service {
+    /*
     private FusedLocationProviderClient fusedLocationProviderClient = null;
     private LocationCallback locationCallback = null;
-    private LocationRequest locationRequest = null;
+    private LocationRequest locationRequest = null;*/
+
+    private GPS gps = null;
 
     @Override
     public void onCreate() {
         super.onCreate();
 
+        gps = new GPS(this, new LocationCallback(){
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                for (Location location : locationResult.getLocations()) {
+                    Intent locationUpdates = new Intent(IntentExtras.locationUpdates);
+                    locationUpdates.putExtra(IntentExtras.longitude, location.getLongitude());
+                    locationUpdates.putExtra(IntentExtras.latitude, location.getLatitude());
+                    sendBroadcast(locationUpdates);
+                }
+            }
+        }, true);
+/*
         initializeLocationRequest();
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         updateLocation();
-        startLocationUpdates();
+        startLocationUpdates();*/
     }
-
+/*
     private void startLocationUpdates() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) ==
                 PackageManager.PERMISSION_GRANTED)
@@ -59,7 +74,7 @@ public class GPS_Service extends Service {
                 }
             }
         };
-    }
+    }*/
 
     @Nullable
     @Override
@@ -71,6 +86,7 @@ public class GPS_Service extends Service {
     public void onDestroy() {
         super.onDestroy();
 
-        fusedLocationProviderClient.removeLocationUpdates(locationCallback);
+        gps.removeLocationUpdates();
+        //fusedLocationProviderClient.removeLocationUpdates(locationCallback);
     }
 }
