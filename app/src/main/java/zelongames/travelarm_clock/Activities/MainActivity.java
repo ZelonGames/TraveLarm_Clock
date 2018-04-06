@@ -14,6 +14,7 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
+import android.media.AudioManager;
 import android.os.Build;
 import android.preference.DialogPreference;
 import android.support.annotation.NonNull;
@@ -24,6 +25,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
@@ -110,23 +112,61 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
 
         if (isServiceOK()) {
             getLocationPermission();
-            gps = new GPS(this, new LocationCallback(){
+            gps = new GPS(this, new LocationCallback() {
                 @Override
                 public void onLocationResult(LocationResult locationResult) {
                     super.onLocationResult(locationResult);
                 }
             }, false);
         }
+
+        //AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
     }
 
-    public static void setCurrentAlarm(Intent intent, Alarm currentAlarm) {
+    private void setCurrentAlarm(Intent intent, Alarm currentAlarm) {
         if (intent.getExtras() != null) {
-            currentAlarm = intent.getExtras().getParcelable(IntentExtras.alarm);
+            final String keyName = intent.getExtras().keySet().toArray()[0].toString();
+
+            if (keyName.equals(IntentExtras.alarm) || keyName.equals("test"))
+                currentAlarm = intent.getExtras().getParcelable(keyName);
+
+
             if (!currentAlarm.enabled)
                 currentAlarm = null;
             else {
                 String alarmName = currentAlarm.getName();
                 currentAlarm = StorageHelper.alarms.get(alarmName);
+            }
+
+            final Alarm alarm = currentAlarm;
+
+            switch (keyName) {
+                case "test":
+                    if (currentAlarm.getIsRunning()) {
+                        AlertDialog.Builder dialogBuilder = DialogHelper.createDialogBuilder(this, alarm.getName(), "Wake up!");
+
+                        dialogBuilder.setNeutralButton("Stop", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                alarm.stop();
+                                stopGPS_Service();
+                                dialog.dismiss();
+                            }
+                        });
+/*
+                        dialogBuilder.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                            @Override
+                            public void onDismiss(DialogInterface dialog) {
+                                alarm.stop();
+                                stopGPS_Service();
+                            }
+                        });*/
+
+                        AlertDialog dialog = dialogBuilder.create();
+                        dialog.setCancelable(false);
+                        dialog.show();
+                    }
+                    break;
             }
         }
     }
@@ -137,6 +177,8 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
 
         if (broadcastReceiver == null) {
             broadcastReceiver = new BroadcastReceiver() {
+
+
                 @Override
                 public void onReceive(Context context, Intent intent) {
                     double recievedLongitude = (double) intent.getExtras().get(IntentExtras.longitude);
@@ -148,10 +190,11 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
                         location.setLatitude(recievedLatitude);
                         currentAlarm.updateAlarm(MainActivity.this, location);
                         if (currentAlarm.getIsRunning()) {
-                            Intent mainIntent = getIntent();
+                            currentAlarm.playRingtone();
+                            Intent i = new Intent(MainActivity.this, MainActivity.class);
+                            i.putExtra("test", currentAlarm);
                             finish();
-                            mainIntent.putExtra("", currentAlarm);
-                            startActivity(mainIntent);
+                            context.startActivity(i);
                         }
                     }
                 }
@@ -201,7 +244,7 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
     }
 
     private void addAlarm() {
-        gps.geoLocate(this, gMap,  searchText);
+        gps.geoLocate(this, gMap, searchText);
 
         if (Alarm.currentLocation == null)
             return;
@@ -221,7 +264,12 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
 
                         MapHelper.createCircleAroundAlarm(gMap, alarm);
 
-                        Toast.makeText(MainActivity.this, "New alarm created at: " + alarm.getLocationName() + ".", Toast.LENGTH_SHORT).show();
+                        currentAlarm = StorageHelper.alarms.get(alarm.getName());
+
+                        Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
+                        intent.putExtra(IntentExtras.alarm, currentAlarm);
+                        startActivity(intent);
+                        //Toast.makeText(MainActivity.this, "New alarm created at: " + alarm.getLocationName() + ".", Toast.LENGTH_SHORT).show();
                     }
                 }, new DialogInterface.OnClickListener() {
                     @Override
@@ -312,11 +360,7 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
         gMap = googleMap;
         gMap.setOnMarkerClickListener(this);
 
-        for (Alarm alarm : StorageHelper.alarms.values()) {
-            Marker marker = alarm.marker;
-            alarm.marker = gMap.addMarker(new MarkerOptions().title(marker.getTitle()).position(marker.getPosition()));
-            MapHelper.createCircleAroundAlarm(gMap, alarm);
-        }
+        reloadAlarmMarkers();
 
         if (locationPermissionGranted) {
             gps.getDeviceLocation(gMap, this, locationPermissionGranted);
@@ -328,6 +372,25 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
             gMap.setMyLocationEnabled(true);
 
             init();
+        }
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+
+        reloadAlarmMarkers();
+    }
+
+    private void reloadAlarmMarkers(){
+        if (gMap == null)
+            return;
+
+        gMap.clear();
+
+        for (Alarm alarm : StorageHelper.alarms.values()) {
+            alarm.marker = gMap.addMarker(new MarkerOptions().title(alarm.getName()).position(alarm.getLocation()));
+            MapHelper.createCircleAroundAlarm(gMap, alarm);
         }
     }
 
@@ -375,4 +438,6 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
 
         return false;
     }
+
+
 }

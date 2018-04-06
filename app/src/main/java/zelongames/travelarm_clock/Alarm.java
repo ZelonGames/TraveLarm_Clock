@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.drm.DrmStore;
 import android.location.Location;
+import android.media.AudioManager;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -21,6 +22,8 @@ import zelongames.travelarm_clock.Activities.MainActivity;
 
 public class Alarm implements Parcelable {
 
+    public static final String UN_NAMED_TAG = "Unnamed";
+
     public static String currentAlarmName = "";
     public static String currentLocationName = "";
     public static LatLng currentLocation = null;
@@ -29,6 +32,8 @@ public class Alarm implements Parcelable {
         currentLocationName = null;
         currentLocation = null;
     }
+
+    public AudioManager audioManager = null;
 
     public Marker marker = null;
 
@@ -50,12 +55,15 @@ public class Alarm implements Parcelable {
             return name;
     }
 
+    public String getDisplayName(){
+        return hasCustomName() ? getName() : UN_NAMED_TAG;
+    }
+
     public void setName(String name, HashMap<String, Alarm> alarmList) {
         if (alarmList.containsKey(getName()))
             alarmList.put(name, alarmList.remove(getName()));
 
         this.name = name;
-        marker.setTitle(name);
     }
 
     private String locationName = null;
@@ -92,6 +100,7 @@ public class Alarm implements Parcelable {
         this.ringtoneUriString = in.readString();
         this.vibrating = byteToBoolean(in.readByte());
         this.enabled = byteToBoolean(in.readByte());
+        this.isRunning = byteToBoolean(in.readByte());
     }
 
     public void updateAlarm(final Context context, Location location) {
@@ -107,10 +116,15 @@ public class Alarm implements Parcelable {
         }
     }
 
-    public void run(Context context){
-        //showDialog(context);
+    public void playRingtone(){
         ringtone.play();
+    }
+
+    public void stop(){
         isRunning = false;
+        ringtone.stop();
+        enabled = false;
+        ringtone = null;
     }
 
     private void createDialog(Context context) {
@@ -122,10 +136,8 @@ public class Alarm implements Parcelable {
         dialogBuilder.setNeutralButton("Stop", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                ringtone.stop();
+                stop();
                 dialog.dismiss();
-                enabled = false;
-                ringtone = null;
             }
         });
 
@@ -161,6 +173,7 @@ public class Alarm implements Parcelable {
         parcel.writeString(ringtoneUriString);
         parcel.writeByte(booleanToByte(vibrating));
         parcel.writeByte(booleanToByte(enabled));
+        parcel.writeByte(booleanToByte(isRunning));
     }
 
     private boolean byteToBoolean(byte value) {
@@ -177,5 +190,9 @@ public class Alarm implements Parcelable {
 
     public boolean hasName() {
         return !getName().equals("");
+    }
+
+    public boolean hasCustomName(){
+        return !getName().equals(getLocationName());
     }
 }

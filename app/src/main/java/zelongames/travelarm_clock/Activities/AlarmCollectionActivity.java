@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,6 +34,8 @@ public class AlarmCollectionActivity extends ToolbarCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Intent intent = new Intent(AlarmCollectionActivity.this, SettingsActivity.class);
+                Alarm chosenAlarm = StorageHelper.alarms.get(getChosenAlarmName(view));
+                intent.putExtra(IntentExtras.alarm, chosenAlarm);
                 startActivity(intent);
             }
         });
@@ -46,5 +49,16 @@ public class AlarmCollectionActivity extends ToolbarCompatActivity {
         }
 
         return arrayList;
+    }
+
+    private String getChosenAlarmName(View view){
+        TextView nameTxtView = view.findViewById(R.id.alarmName);
+        String alarmName = nameTxtView.getText().toString();
+        if (nameTxtView.getText().equals(Alarm.UN_NAMED_TAG)){
+            TextView locationNameTxtView = view.findViewById(R.id.alarmLocation);
+            alarmName = locationNameTxtView.getText().toString();
+        }
+
+        return alarmName;
     }
 }

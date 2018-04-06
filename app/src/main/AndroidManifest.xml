@@ -29,7 +29,6 @@
             </intent-filter>
         </activity>
         <activity android:name=".Activities.AlarmCollectionActivity" />
-        <activity android:name=".Activities.AlarmDialogActivity" />
         <activity android:name=".Activities.SettingsActivity"
             android:theme="@style/SettingsTheme"/>
 
