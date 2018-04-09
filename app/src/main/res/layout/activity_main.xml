@@ -20,7 +20,7 @@
         <include layout="@layout/toolbar" />
 
         <RelativeLayout
-            android:id="@+id/SearchLocationBackground"
+            android:id="@+id/SearchLocationBar"
             android:layout_width="match_parent"
             android:layout_height="40dp"
             android:layout_marginLeft="10dp"
@@ -41,8 +41,8 @@
                 android:id="@+id/input_search"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginLeft="10dp"
                 android:layout_centerVertical="true"
+                android:layout_marginLeft="10dp"
                 android:layout_toRightOf="@id/ic_magnify"
                 android:background="@null"
                 android:hint="Search for a location"
@@ -53,5 +53,52 @@
                 android:textSize="18sp" />
 
         </RelativeLayout>
+
+        <LinearLayout
+            android:id="@+id/AlarmInfoBar"
+            android:layout_width="match_parent"
+            android:layout_height="63sp"
+            android:layout_below="@+id/toolbar"
+            android:background="@color/colorSecondary"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_weight="1">
+
+                <TextView
+                    android:id="@+id/txtDestination"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#fff"
+                    android:text="Destination:" />
+
+                <TextView
+                    android:id="@+id/txtDistanceLeft"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#fff"
+                    android:text="Distance left:" />
+
+            </LinearLayout>
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Cancel"
+                android:textColor="#fff"
+                android:onClick="onCancelAlarm"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
     </RelativeLayout>
 </android.support.constraint.ConstraintLayout>

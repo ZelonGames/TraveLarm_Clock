@@ -2,7 +2,6 @@ package zelongames.travelarm_clock.Activities;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -10,25 +9,19 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
-import android.location.LocationManager;
-import android.media.AudioManager;
-import android.os.Build;
-import android.preference.DialogPreference;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -37,45 +30,32 @@ import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
-import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.AutocompletePrediction;
 import com.google.android.gms.location.places.GeoDataClient;
-import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.PlaceBuffer;
 import com.google.android.gms.location.places.Places;
-import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 
 import zelongames.travelarm_clock.Alarm;
-import zelongames.travelarm_clock.DialogHelper;
+import zelongames.travelarm_clock.Helpers.DialogHelper;
 import zelongames.travelarm_clock.GPS;
-import zelongames.travelarm_clock.GPS_Service;
 import zelongames.travelarm_clock.IntentExtras;
-import zelongames.travelarm_clock.MapHelper;
+import zelongames.travelarm_clock.Helpers.MapHelper;
 import zelongames.travelarm_clock.PlaceAutocompleteAdapter;
 import zelongames.travelarm_clock.R;
-import zelongames.travelarm_clock.StorageHelper;
+import zelongames.travelarm_clock.Helpers.StorageHelper;
+import zelongames.travelarm_clock.Helpers.ViewHelper;
 
 public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener, GoogleApiClient.OnConnectionFailedListener {
+
     private static final int ERROR_DIALOG_REQUEST = 9001;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
     private static final String FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
@@ -83,7 +63,6 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
 
     private static final LatLngBounds LAT_LNG_BOUNDS = new LatLngBounds(
             new LatLng(-40, -160), new LatLng(71, 136));
-
 
     private boolean locationPermissionGranted = false;
 
@@ -108,14 +87,14 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
 
         searchText = findViewById(R.id.input_search);
 
-        setCurrentAlarm(getIntent(), currentAlarm);
+        setCurrentAlarm(getIntent());
 
         if (isServiceOK()) {
             getLocationPermission();
             gps = new GPS(this, new LocationCallback() {
                 @Override
                 public void onLocationResult(LocationResult locationResult) {
-                    super.onLocationResult(locationResult);
+
                 }
             }, false);
         }
@@ -123,13 +102,12 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
         //AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
     }
 
-    private void setCurrentAlarm(Intent intent, Alarm currentAlarm) {
+    private void setCurrentAlarm(Intent intent) {
         if (intent.getExtras() != null) {
             final String keyName = intent.getExtras().keySet().toArray()[0].toString();
 
             if (keyName.equals(IntentExtras.alarm) || keyName.equals("test"))
                 currentAlarm = intent.getExtras().getParcelable(keyName);
-
 
             if (!currentAlarm.enabled)
                 currentAlarm = null;
@@ -138,33 +116,12 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
                 currentAlarm = StorageHelper.alarms.get(alarmName);
             }
 
-            final Alarm alarm = currentAlarm;
-
             switch (keyName) {
-                case "test":
-                    if (currentAlarm.getIsRunning()) {
-                        AlertDialog.Builder dialogBuilder = DialogHelper.createDialogBuilder(this, alarm.getName(), "Wake up!");
-
-                        dialogBuilder.setNeutralButton("Stop", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                alarm.stop();
-                                stopGPS_Service();
-                                dialog.dismiss();
-                            }
-                        });
-/*
-                        dialogBuilder.setOnDismissListener(new DialogInterface.OnDismissListener() {
-                            @Override
-                            public void onDismiss(DialogInterface dialog) {
-                                alarm.stop();
-                                stopGPS_Service();
-                            }
-                        });*/
-
-                        AlertDialog dialog = dialogBuilder.create();
-                        dialog.setCancelable(false);
-                        dialog.show();
+                case IntentExtras.alarm:
+                    if (currentAlarm.enabled) {
+                        RelativeLayout searchLocationBar = findViewById(R.id.SearchLocationBar);
+                        LinearLayout alarmInfoBar = findViewById(R.id.AlarmInfoBar);
+                        ViewHelper.switchBetweenViews(searchLocationBar, alarmInfoBar);
                     }
                     break;
             }
@@ -172,13 +129,34 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
     }
 
     @Override
+    protected void onRestart() {
+        super.onRestart();
+
+        reloadAlarmMarkers();
+    }
+
+    public void onCancelAlarm(View view) {
+        LinearLayout alarmInfoBar = findViewById(R.id.AlarmInfoBar);
+        RelativeLayout searchLocationBar = findViewById(R.id.SearchLocationBar);
+        ViewHelper.switchBetweenViews(alarmInfoBar, searchLocationBar);
+
+        if (currentAlarm != null) {
+            currentAlarm.stop(MainActivity.this);
+            currentAlarm = null;
+        }
+    }
+
+
+
+    @Override
     protected void onResume() {
         super.onResume();
 
+        final TextView txtDistanceLeft = findViewById(R.id.txtDistanceLeft);
+        final TextView txtDestination = findViewById(R.id.txtDestination);
+
         if (broadcastReceiver == null) {
             broadcastReceiver = new BroadcastReceiver() {
-
-
                 @Override
                 public void onReceive(Context context, Intent intent) {
                     double recievedLongitude = (double) intent.getExtras().get(IntentExtras.longitude);
@@ -189,13 +167,10 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
                         location.setLongitude(recievedLongitude);
                         location.setLatitude(recievedLatitude);
                         currentAlarm.updateAlarm(MainActivity.this, location);
-                        if (currentAlarm.getIsRunning()) {
-                            currentAlarm.playRingtone();
-                            Intent i = new Intent(MainActivity.this, MainActivity.class);
-                            i.putExtra("test", currentAlarm);
-                            finish();
-                            context.startActivity(i);
-                        }
+
+                        txtDistanceLeft.setText("Distance left: " + currentAlarm.getCurrentDistance() + "m");
+                        String alarmName = currentAlarm.hasCustomName() ? " (" + currentAlarm.getDisplayName() + ")" : "";
+                        txtDestination.setText("Destination: " + currentAlarm.getLocationName() + alarmName);
                     }
                 }
             };
@@ -249,6 +224,12 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
         if (Alarm.currentLocation == null)
             return;
 
+        showAddAlarmDialog();
+
+        Alarm.resetCurrentValues();
+    }
+
+    private void showAddAlarmDialog() {
         final MarkerOptions markerOptions = new MarkerOptions()
                 .position(Alarm.currentLocation)
                 .title(Alarm.currentLocationName);
@@ -259,7 +240,7 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         Marker marker = gMap.addMarker(markerOptions);
-                        Alarm alarm = new Alarm(markerOptions.getTitle(), markerOptions.getPosition(), marker);
+                        Alarm alarm = new Alarm(markerOptions.getTitle(), markerOptions.getPosition());
                         StorageHelper.alarms.put(alarm.getName(), alarm);
 
                         MapHelper.createCircleAroundAlarm(gMap, alarm);
@@ -277,8 +258,6 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
                         dialogInterface.dismiss();
                     }
                 }).show();
-
-        Alarm.resetCurrentValues();
     }
 
     private void initMap() {
@@ -317,17 +296,6 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
             ActivityCompat.requestPermissions(this, permissions, LOCATION_PERMISSION_REQUEST_CODE);
     }
 
-    public void startGPS_Service() {
-        Intent gpsService = new Intent(this, GPS_Service.class);
-        gpsService.putExtra(IntentExtras.alarm, currentAlarm);
-        startService(gpsService);
-    }
-
-    private void stopGPS_Service() {
-        Intent gpsService = new Intent(this, GPS_Service.class);
-        stopService(gpsService);
-    }
-
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         locationPermissionGranted = false;
@@ -345,7 +313,6 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
 
                     locationPermissionGranted = true;
                     initMap();
-                    //startGPS_Service();
                 }
                 break;
         }
@@ -375,27 +342,19 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
         }
     }
 
-    @Override
-    protected void onRestart() {
-        super.onRestart();
-
-        reloadAlarmMarkers();
-    }
-
-    private void reloadAlarmMarkers(){
+    private void reloadAlarmMarkers() {
         if (gMap == null)
             return;
 
         gMap.clear();
 
         for (Alarm alarm : StorageHelper.alarms.values()) {
-            alarm.marker = gMap.addMarker(new MarkerOptions().title(alarm.getName()).position(alarm.getLocation()));
+            gMap.addMarker(new MarkerOptions().title(alarm.getName()).position(alarm.getLocation()));
             MapHelper.createCircleAroundAlarm(gMap, alarm);
         }
     }
 
     private void hideKeyboard() {
-        //this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
         inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
     }
@@ -438,6 +397,5 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
 
         return false;
     }
-
 
 }

@@ -53,7 +53,6 @@ public class DistancePickerPreference extends DialogPreference {
         numberPicker.setValue(currentValue / 100 - 1);
         numberPicker.setDisplayedValues(values);
 
-
         numberPicker.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
             @Override
             public void onValueChange(NumberPicker picker, int oldVal, int newVal) {

@@ -14,7 +14,7 @@ import zelongames.travelarm_clock.Alarm;
 import zelongames.travelarm_clock.IntentExtras;
 import zelongames.travelarm_clock.ListAdapters.AlarmListAdapter;
 import zelongames.travelarm_clock.R;
-import zelongames.travelarm_clock.StorageHelper;
+import zelongames.travelarm_clock.Helpers.StorageHelper;
 
 public class AlarmCollectionActivity extends ToolbarCompatActivity {
 

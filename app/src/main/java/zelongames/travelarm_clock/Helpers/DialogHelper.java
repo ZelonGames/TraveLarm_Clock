@@ -1,4 +1,4 @@
-package zelongames.travelarm_clock;
+package zelongames.travelarm_clock.Helpers;
 
 import android.app.AlertDialog;
 import android.app.Dialog;

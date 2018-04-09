@@ -4,7 +4,6 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.drm.DrmStore;
 import android.location.Location;
 import android.media.AudioManager;
 import android.media.Ringtone;
@@ -12,13 +11,18 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.Vibrator;
+import android.support.v7.app.AppCompatActivity;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 
 import java.util.HashMap;
 
-import zelongames.travelarm_clock.Activities.MainActivity;
+import zelongames.travelarm_clock.Helpers.DialogHelper;
+import zelongames.travelarm_clock.Helpers.ViewHelper;
 
 public class Alarm implements Parcelable {
 
@@ -33,12 +37,13 @@ public class Alarm implements Parcelable {
         currentLocation = null;
     }
 
-    public AudioManager audioManager = null;
+    private Vibrator vibrator = null;
 
-    public Marker marker = null;
+    private AudioManager audioManager = null;
 
     public String ringtoneUriString = RingtoneManager.EXTRA_RINGTONE_DEFAULT_URI;
     private Ringtone ringtone = null;
+
     public Ringtone setRingtone(Context context) {
         Uri uri = Uri.parse(ringtoneUriString);
         return ringtone = RingtoneManager.getRingtone(context, uri);
@@ -55,7 +60,7 @@ public class Alarm implements Parcelable {
             return name;
     }
 
-    public String getDisplayName(){
+    public String getDisplayName() {
         return hasCustomName() ? getName() : UN_NAMED_TAG;
     }
 
@@ -78,20 +83,25 @@ public class Alarm implements Parcelable {
         return location;
     }
 
+    private Float currentDistance = null;
+
+    public Float getCurrentDistance() {
+        return currentDistance;
+    }
+
     public int distanceInMeters = 200;
-    public boolean vibrating = false;
+    public boolean vibrating = true;
     public boolean enabled = false;
 
     private boolean isRunning = false;
 
-    public boolean getIsRunning(){
+    public boolean getIsRunning() {
         return isRunning;
     }
 
-    public Alarm(String locationName, LatLng location, Marker marker) {
+    public Alarm(String locationName, LatLng location) {
         this.locationName = locationName;
         this.location = location;
-        this.marker = marker;
     }
 
     private Alarm(Parcel in) {
@@ -103,49 +113,72 @@ public class Alarm implements Parcelable {
         this.isRunning = byteToBoolean(in.readByte());
     }
 
-    public void updateAlarm(final Context context, Location location) {
-        if (!enabled || (ringtone != null && ringtone.isPlaying()))
+    public void updateAlarm(Context context, Location location) {
+        if (!enabled || isRunning)
             return;
 
         final float[] results = new float[1];
         Location.distanceBetween(location.getLatitude(), location.getLongitude(), getLocation().latitude, getLocation().longitude, results);
-        if (ringtone == null)
-            setRingtone(context);
+        currentDistance = results[0];
+
         if (results[0] <= distanceInMeters) {
+            if (ringtone == null)
+                setRingtone(context);
             isRunning = true;
         }
+
+        if (getIsRunning())
+            start(context);
     }
 
-    public void playRingtone(){
+    public void stop(Context context) {
+        isRunning = false;
+        if (ringtone != null)
+            ringtone.stop();
+        if (vibrator != null)
+            vibrator.cancel();
+        enabled = false;
+        ringtone = null;
+        currentDistance = null;
+
+        GPS_Service.stop(context);
+    }
+
+    public void start(Context context) {
+        isRunning = false;
+        showDialog(context);
+        vibrate(context);
         ringtone.play();
     }
 
-    public void stop(){
-        isRunning = false;
-        ringtone.stop();
-        enabled = false;
-        ringtone = null;
-    }
-
-    private void createDialog(Context context) {
-        if (dialog != null)
+    private void vibrate(Context context) {
+        if (!vibrating)
             return;
 
-        AlertDialog.Builder dialogBuilder = DialogHelper.createDialogBuilder(context, "Alarm", "Wake up!");
+        if (vibrator == null)
+            vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+        long[] pattern = {0, 600, 400};
+        vibrator.vibrate(pattern, 0);
+    }
+
+    private void showDialog(final Context context) {
+        AlertDialog.Builder dialogBuilder = DialogHelper.createDialogBuilder(context, getName(), "Wake up!");
+
+        final AppCompatActivity activity = (AppCompatActivity) context;
 
         dialogBuilder.setNeutralButton("Stop", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                stop();
+                stop(context);
+                LinearLayout alarmInfoBar = activity.findViewById(R.id.AlarmInfoBar);
+                RelativeLayout searchLocationBar = activity.findViewById(R.id.SearchLocationBar);
+                ViewHelper.switchBetweenViews(alarmInfoBar, searchLocationBar);
                 dialog.dismiss();
             }
         });
 
-        dialog = dialogBuilder.create();
-    }
-
-    public void showDialog(Context context){
-        createDialog(context);
+        AlertDialog dialog = dialogBuilder.create();
+        dialog.setCancelable(false);
         dialog.show();
     }
 
@@ -184,15 +217,7 @@ public class Alarm implements Parcelable {
         return value ? (byte) 1 : 0;
     }
 
-    public static boolean canAddAlarm() {
-        return !currentLocationName.equals("");
-    }
-
-    public boolean hasName() {
-        return !getName().equals("");
-    }
-
-    public boolean hasCustomName(){
+    public boolean hasCustomName() {
         return !getName().equals(getLocationName());
     }
 }

@@ -19,6 +19,11 @@
         <item name="android:padding">20dp</item>
     </style>
 
+
+    <style name="AlarmButtonStyle" parent="@style/Widget.AppCompat.Button.Colored">
+        <item name="android:textColor">#fff</item>
+    </style>
+
     <style name="ListViewStyle" parent="@style/Widget.AppCompat.ListView">
         <item name="android:colorAccent">@color/colorSecondary</item>
     </style>

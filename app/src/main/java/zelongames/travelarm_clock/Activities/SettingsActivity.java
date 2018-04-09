@@ -3,8 +3,6 @@ package zelongames.travelarm_clock.Activities;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.Ringtone;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
@@ -14,20 +12,18 @@ import zelongames.travelarm_clock.GPS_Service;
 import zelongames.travelarm_clock.IntentExtras;
 import zelongames.travelarm_clock.R;
 import zelongames.travelarm_clock.SettingsFragment;
-import zelongames.travelarm_clock.StorageHelper;
+import zelongames.travelarm_clock.Helpers.StorageHelper;
 
 
 public class SettingsActivity extends ToolbarCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     private Alarm currentAlarm = null;
 
-    private Ringtone currentRingtone = null;
     private String ringtoneUriString = null;
     private String alarmName = null;
     private Integer distance = null;
-    private Boolean vibrating = null;
+    private boolean vibrating = true;
     private boolean enabled = true;
-
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -47,11 +43,10 @@ public class SettingsActivity extends ToolbarCompatActivity implements SharedPre
                 .replace(R.id.displayPrefs, new SettingsFragment())
                 .commit();
 
-        SharedPreferences settings = PreferenceManager.
-                getDefaultSharedPreferences(getBaseContext());
+        SharedPreferences settings = PreferenceManager
+                .getDefaultSharedPreferences(getBaseContext());
         settings.registerOnSharedPreferenceChangeListener(this);
     }
-
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
@@ -65,8 +60,6 @@ public class SettingsActivity extends ToolbarCompatActivity implements SharedPre
                 break;
             case "alarm":
                 ringtoneUriString = sharedPreferences.getString(s, "");
-                //Uri uri = Uri.parse(sharedPreferences.getString(s, ""));
-                //currentRingtone = RingtoneManager.getRingtone(SettingsActivity.this, uri);
                 break;
             case "vibrate":
                 vibrating = sharedPreferences.getBoolean(s, true);
@@ -86,19 +79,13 @@ public class SettingsActivity extends ToolbarCompatActivity implements SharedPre
             currentAlarm.distanceInMeters = distance;
         if (ringtoneUriString != null)
             currentAlarm.ringtoneUriString = ringtoneUriString;
-        if (vibrating != null)
-            currentAlarm.vibrating = vibrating;
+        currentAlarm.vibrating = vibrating;
         currentAlarm.enabled = enabled;
 
-        startGPS_Service();
+        GPS_Service.start(SettingsActivity.this);
 
         Intent intent = new Intent(this, MainActivity.class);
         intent.putExtra(IntentExtras.alarm, currentAlarm);
         startActivity(intent);
-    }
-
-    public void startGPS_Service(){
-        Intent gpsService = new Intent(this, GPS_Service.class);
-        startService(gpsService);
     }
 }
