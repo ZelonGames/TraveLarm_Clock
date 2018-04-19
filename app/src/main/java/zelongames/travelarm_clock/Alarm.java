@@ -15,6 +15,7 @@ import android.os.Vibrator;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
 
@@ -153,6 +154,7 @@ public class Alarm implements Parcelable {
     }
 
     private Alarm(Parcel in) {
+        this.location = new LatLng(in.readDouble(), in.readDouble());
         this.name = in.readString();
         this.locationName = in.readString();
         this.ringtoneUriString = in.readString();
@@ -252,6 +254,8 @@ public class Alarm implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeDouble(location.latitude);
+        parcel.writeDouble(location.longitude);
         parcel.writeString(getName());
         parcel.writeString(getLocationName());
         parcel.writeString(ringtoneUriString);

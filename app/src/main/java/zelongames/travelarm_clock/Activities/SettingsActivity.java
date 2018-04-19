@@ -127,8 +127,6 @@ public class SettingsActivity extends ToolbarCompatActivity implements SharedPre
     }
 
     public void onApplyChanges(View view) {
-
-
         final String oldName = new String(currentAlarm.getName());
 
         if (alarmName != null)
@@ -148,7 +146,6 @@ public class SettingsActivity extends ToolbarCompatActivity implements SharedPre
 
         currentAlarm.vibrating = vibratingPreference.getBoolean(vibratingPreferenceName, true);
         currentAlarm.enabled = enabledPreference.getBoolean(enabledPreferenceName, true);
-
 
         DatabaseHelper.editItemFromDatabase(currentAlarm, oldName, alarmName, "", "", "", "", "", "", MainActivity.getDatabaseHelper().getWritableDatabase());
 

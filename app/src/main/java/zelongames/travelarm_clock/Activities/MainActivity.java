@@ -124,27 +124,20 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
     }
 
     private void setCurrentAlarm(Intent intent) {
+
         if (intent.getExtras() != null) {
             final String keyName = intent.getExtras().keySet().toArray()[0].toString();
 
-            if (keyName.equals(IntentExtras.alarm) || keyName.equals("test"))
+            if (keyName.equals(IntentExtras.alarm))
                 currentAlarm = intent.getExtras().getParcelable(keyName);
 
             if (!currentAlarm.enabled)
                 currentAlarm = null;
-            else {
-                String alarmName = currentAlarm.getName();
-                currentAlarm = StorageHelper.alarms.get(alarmName);
-            }
 
-            switch (keyName) {
-                case IntentExtras.alarm:
-                    if (currentAlarm != null && currentAlarm.enabled) {
-                        RelativeLayout searchLocationBar = findViewById(R.id.SearchLocationBar);
-                        LinearLayout alarmInfoBar = findViewById(R.id.AlarmInfoBar);
-                        ViewHelper.switchBetweenViews(searchLocationBar, alarmInfoBar);
-                    }
-                    break;
+            if (currentAlarm != null && currentAlarm.enabled) {
+                RelativeLayout searchLocationBar = findViewById(R.id.SearchLocationBar);
+                LinearLayout alarmInfoBar = findViewById(R.id.AlarmInfoBar);
+                ViewHelper.switchBetweenViews(searchLocationBar, alarmInfoBar);
             }
         }
     }
@@ -178,10 +171,10 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
             broadcastReceiver = new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {
-                    double recievedLongitude = (double) intent.getExtras().get(IntentExtras.longitude);
-                    double recievedLatitude = (double) intent.getExtras().get(IntentExtras.latitude);
-
                     if (currentAlarm != null) {
+                        double recievedLongitude = (double) intent.getExtras().get(IntentExtras.longitude);
+                        double recievedLatitude = (double) intent.getExtras().get(IntentExtras.latitude);
+
                         Location location = new Location("location");
                         location.setLongitude(recievedLongitude);
                         location.setLatitude(recievedLatitude);
