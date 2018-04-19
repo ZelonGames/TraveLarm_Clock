@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="alarmName">name</string>
+    <string name="alarmNameSummary">name</string>
+
+    <string name="distancePicker">distancePicker</string>
+    <string name="distancePickerSummary">distance</string>
+
+    <string name="ringtonePreference">ringtone</string>
+    <string name="ringtonePreferenceSummary">ringtone</string>
+
+    <string name="vibrating">vibrating</string>
+    <string name="enabled">enabled</string>
+    <string name="volume">volume</string>
+</resources>

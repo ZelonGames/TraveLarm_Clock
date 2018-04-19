@@ -5,33 +5,31 @@
     app:theme="@style/SettingsTheme">
 
     <EditTextPreference
-        android:key="alarmName"
-        android:title="Alarm Name"
         android:dialogTitle="Alarm Name"
-        android:textColor="#fff"/>
+        android:key="@string/alarmName"
+        android:summary="@string/alarmNameSummary"
+        android:textColor="#fff"
+        android:title="Alarm Name" />
 
     <zelongames.travelarm_clock.CustomPreferences.DistancePickerPreference
-        android:key="distancePicker"
+        android:key="@string/distancePicker"
+        android:summary="@string/distancePickerSummary"
         android:title="Distance" />
 
     <RingtonePreference
-        android:key="alarm"
-        android:title="Ringtone"
-        android:summary="tone"
-        android:ringtoneType="alarm"/>
+        android:key="@string/ringtonePreference"
+        android:ringtoneType="alarm"
+        android:summary="@string/ringtonePreferenceSummary"
+        android:title="Ringtone" />
 
     <SwitchPreference
         android:defaultValue="true"
-        android:key="vibrate"
+        android:key="@string/vibrating"
         android:title="Vibrate" />
 
     <SwitchPreference
         android:defaultValue="true"
-        android:key="enabled"
+        android:key="@string/enabled"
         android:title="Enabled" />
-
-    <zelongames.travelarm_clock.CustomPreferences.SeekBarPreference
-        android:key="volume"
-        android:title="Volume"/>
 
 </PreferenceScreen>

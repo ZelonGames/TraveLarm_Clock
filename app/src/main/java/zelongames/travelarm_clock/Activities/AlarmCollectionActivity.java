@@ -1,7 +1,10 @@
 package zelongames.travelarm_clock.Activities;
 
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -11,6 +14,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import zelongames.travelarm_clock.Alarm;
+import zelongames.travelarm_clock.Database.DatabaseHelper;
+import zelongames.travelarm_clock.Helpers.DialogHelper;
 import zelongames.travelarm_clock.IntentExtras;
 import zelongames.travelarm_clock.ListAdapters.AlarmListAdapter;
 import zelongames.travelarm_clock.R;
@@ -25,7 +30,9 @@ public class AlarmCollectionActivity extends ToolbarCompatActivity {
 
         initializeToolBar("Alarm Collection", R.menu.menu_toolbar_back, true);
 
-        ListView listView = (ListView) findViewById(R.id.alarmCollection);
+        DatabaseHelper.readItemsFromDatabase(MainActivity.getDatabaseHelper().getReadableDatabase());
+
+        final ListView listView = findViewById(R.id.alarmCollection);
 
         AlarmListAdapter adapter = new AlarmListAdapter(this, R.layout.alarm_collection_list_layout, hashMapToArrayList(StorageHelper.alarms));
         listView.setAdapter(adapter);
@@ -37,6 +44,39 @@ public class AlarmCollectionActivity extends ToolbarCompatActivity {
                 Alarm chosenAlarm = StorageHelper.alarms.get(getChosenAlarmName(view));
                 intent.putExtra(IntentExtras.alarm, chosenAlarm);
                 startActivity(intent);
+            }
+        });
+
+        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, final View view, int position, long id) {
+
+                TextView txtAlarmName = view.findViewById(R.id.alarmName);
+                TextView txtLocationName = view.findViewById(R.id.alarmLocation);
+
+                final String alarmName = txtAlarmName.getText().toString();
+                final String location = txtLocationName.getText().toString();
+
+                String message = "Are you sure you want to remove \"" + location + " (" + alarmName + ")\" from your alarm collection?";
+
+                Dialog dialog = DialogHelper.createPositiveNegativeDialog(AlarmCollectionActivity.this, alarmName, message, "Yes", "No",
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                Alarm.removeAlarm(alarmName, location, MainActivity.getDatabaseHelper());
+                                listView.removeViewInLayout(view);
+                            }
+                        },
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+
+                dialog.show();
+
+                return true;
             }
         });
     }

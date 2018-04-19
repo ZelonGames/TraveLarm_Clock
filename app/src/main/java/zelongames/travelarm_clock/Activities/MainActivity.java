@@ -9,7 +9,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.database.sqlite.SQLiteDatabase;
 import android.location.Location;
+import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -45,6 +47,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import zelongames.travelarm_clock.Alarm;
+import zelongames.travelarm_clock.Database.DatabaseHelper;
 import zelongames.travelarm_clock.Helpers.DialogHelper;
 import zelongames.travelarm_clock.GPS;
 import zelongames.travelarm_clock.IntentExtras;
@@ -68,6 +71,12 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
 
     public Alarm currentAlarm = null;
 
+    private static DatabaseHelper databaseHelper = null;
+
+    public static DatabaseHelper getDatabaseHelper(){
+        return databaseHelper;
+    }
+
     private BroadcastReceiver broadcastReceiver = null;
     private AutoCompleteTextView searchText = null;
     private PlaceAutocompleteAdapter placeAutocompleteAdapter = null;
@@ -85,6 +94,8 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
 
         initializeToolBar("TraveLarm Clock", R.menu.menu_toolbar_main, false);
 
+        setupDatabase();
+
         searchText = findViewById(R.id.input_search);
 
         setCurrentAlarm(getIntent());
@@ -94,12 +105,22 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
             gps = new GPS(this, new LocationCallback() {
                 @Override
                 public void onLocationResult(LocationResult locationResult) {
+                    if (gMap == null)
+                        return;
 
+                    for (Location location : locationResult.getLocations()) {
+                        gps.moveCamera(gMap, new LatLng(location.getLatitude(), location.getLongitude()), GPS.ZOOM);
+                    }
                 }
             }, false);
         }
 
         //AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+    }
+
+    private void setupDatabase(){
+        databaseHelper = new DatabaseHelper(this);
+        databaseHelper.getReadableDatabase();
     }
 
     private void setCurrentAlarm(Intent intent) {
@@ -118,7 +139,7 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
 
             switch (keyName) {
                 case IntentExtras.alarm:
-                    if (currentAlarm.enabled) {
+                    if (currentAlarm != null && currentAlarm.enabled) {
                         RelativeLayout searchLocationBar = findViewById(R.id.SearchLocationBar);
                         LinearLayout alarmInfoBar = findViewById(R.id.AlarmInfoBar);
                         ViewHelper.switchBetweenViews(searchLocationBar, alarmInfoBar);
@@ -145,8 +166,6 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
             currentAlarm = null;
         }
     }
-
-
 
     @Override
     protected void onResume() {
@@ -242,6 +261,7 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
                         Marker marker = gMap.addMarker(markerOptions);
                         Alarm alarm = new Alarm(markerOptions.getTitle(), markerOptions.getPosition());
                         StorageHelper.alarms.put(alarm.getName(), alarm);
+                        DatabaseHelper.addItemToDatabase(alarm, MainActivity.databaseHelper.getWritableDatabase());
 
                         MapHelper.createCircleAroundAlarm(gMap, alarm);
 
@@ -250,7 +270,6 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
                         Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
                         intent.putExtra(IntentExtras.alarm, currentAlarm);
                         startActivity(intent);
-                        //Toast.makeText(MainActivity.this, "New alarm created at: " + alarm.getLocationName() + ".", Toast.LENGTH_SHORT).show();
                     }
                 }, new DialogInterface.OnClickListener() {
                     @Override

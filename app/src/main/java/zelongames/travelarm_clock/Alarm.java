@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.database.sqlite.SQLiteDatabase;
 import android.location.Location;
 import android.media.AudioManager;
 import android.media.Ringtone;
@@ -21,7 +22,9 @@ import com.google.android.gms.maps.model.Marker;
 
 import java.util.HashMap;
 
+import zelongames.travelarm_clock.Database.DatabaseHelper;
 import zelongames.travelarm_clock.Helpers.DialogHelper;
+import zelongames.travelarm_clock.Helpers.StorageHelper;
 import zelongames.travelarm_clock.Helpers.ViewHelper;
 
 public class Alarm implements Parcelable {
@@ -43,6 +46,16 @@ public class Alarm implements Parcelable {
 
     public String ringtoneUriString = RingtoneManager.EXTRA_RINGTONE_DEFAULT_URI;
     private Ringtone ringtone = null;
+
+    public String getRingtoneName(Context context){
+        return ringtone == null ? "" : ringtone.getTitle(context);
+    }
+
+    public static String getRingtoneName(Context context, String ringtoneURI){
+        Uri uri = Uri.parse(ringtoneURI);
+        Ringtone dummyRingtone = RingtoneManager.getRingtone(context, uri);
+        return dummyRingtone.getTitle(context);
+    }
 
     public Ringtone setRingtone(Context context) {
         Uri uri = Uri.parse(ringtoneUriString);
@@ -99,9 +112,21 @@ public class Alarm implements Parcelable {
         return isRunning;
     }
 
+    public Alarm() {
+    }
+
     public Alarm(String locationName, LatLng location) {
         this.locationName = locationName;
         this.location = location;
+    }
+
+    public Alarm(String name, String locationName, String ringtoneURI, LatLng location, boolean vibrating, int distance){
+        this.name = name;
+        this.locationName = locationName;
+        this.ringtoneUriString = ringtoneURI;
+        this.location = location;
+        this.vibrating = vibrating;
+        this.distanceInMeters = distance;
     }
 
     private Alarm(Parcel in) {
@@ -111,6 +136,16 @@ public class Alarm implements Parcelable {
         this.vibrating = byteToBoolean(in.readByte());
         this.enabled = byteToBoolean(in.readByte());
         this.isRunning = byteToBoolean(in.readByte());
+    }
+
+    public void copyAlarmDataFrom(Alarm alarm) {
+        this.name = alarm.getName();
+        this.locationName = alarm.getLocationName();
+        this.ringtoneUriString = alarm.ringtoneUriString;
+        this.vibrating = alarm.vibrating;
+        this.enabled = alarm.enabled;
+        this.distanceInMeters = alarm.distanceInMeters;
+        this.location = alarm.location;
     }
 
     public void updateAlarm(Context context, Location location) {
@@ -145,8 +180,9 @@ public class Alarm implements Parcelable {
     }
 
     public void start(Context context) {
+        if (isRunning)
+            showDialog(context);
         isRunning = false;
-        showDialog(context);
         vibrate(context);
         ringtone.play();
     }
@@ -219,5 +255,10 @@ public class Alarm implements Parcelable {
 
     public boolean hasCustomName() {
         return !getName().equals(getLocationName());
+    }
+
+    public static void removeAlarm(String displayName, String locationName, DatabaseHelper db){
+        String alarmName = displayName == UN_NAMED_TAG ? locationName : displayName;
+        DatabaseHelper.deleteItemFromDatabase(StorageHelper.alarms.get(alarmName), db.getWritableDatabase());
     }
 }

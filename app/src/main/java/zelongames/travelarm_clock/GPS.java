@@ -28,7 +28,7 @@ import java.util.List;
 
 public class GPS {
 
-    private static final float ZOOM = 15;
+    public static final float ZOOM = 15;
 
     private FusedLocationProviderClient fusedLocationProviderClient = null;
     private LocationCallback locationCallback = null;
