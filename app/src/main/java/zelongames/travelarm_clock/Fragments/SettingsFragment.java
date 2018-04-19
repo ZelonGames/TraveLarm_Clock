@@ -1,21 +1,16 @@
 package zelongames.travelarm_clock.Fragments;
 
 
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
-import android.provider.Settings;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
-import zelongames.travelarm_clock.Activities.MainActivity;
 import zelongames.travelarm_clock.Activities.SettingsActivity;
 import zelongames.travelarm_clock.Alarm;
+import zelongames.travelarm_clock.CustomPreferences.DistancePickerPreference;
 import zelongames.travelarm_clock.R;
 
 public class SettingsFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
@@ -23,7 +18,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
     private SettingsActivity activity = null;
 
     private Preference alarmNamePreference = null;
-    private Preference distancePreference = null;
+    private DistancePickerPreference distancePreference = null;
     private Preference ringtonePreference = null;
 
     @Override
@@ -45,7 +40,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
 
     private void initializePreferences() {
         alarmNamePreference = findPreference(activity.getAlarmPreferenceName());
-        distancePreference = findPreference(activity.getDistancePreferenceName());
+        distancePreference = (DistancePickerPreference)findPreference(activity.getDistancePreferenceName());
         ringtonePreference = findPreference(activity.getRingtonePreferenceName());
     }
 
@@ -77,7 +72,9 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         else
             value = getCurrentPreferenceValue(distancePreference, true).toString();
 
-        distancePreference.setSummary(value + " meters");
+        activity.getCurrentAlarm().setMeterTypeName(distancePreference.getMeasureType());
+        activity.getCurrentAlarm().meterTypeDistance = distancePreference.getCurrentValue();
+        distancePreference.setSummary(activity.getCurrentAlarm().meterTypeDistance + " " + activity.getCurrentAlarm().getMeterTypeName());
     }
 
     private void updateRingtonePreferenceSummary(boolean firstTime) {

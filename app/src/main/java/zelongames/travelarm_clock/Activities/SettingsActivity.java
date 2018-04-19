@@ -149,6 +149,7 @@ public class SettingsActivity extends ToolbarCompatActivity implements SharedPre
         currentAlarm.vibrating = vibratingPreference.getBoolean(vibratingPreferenceName, true);
         currentAlarm.enabled = enabledPreference.getBoolean(enabledPreferenceName, true);
 
+
         DatabaseHelper.editItemFromDatabase(currentAlarm, oldName, alarmName, "", "", "", "", "", "", MainActivity.getDatabaseHelper().getWritableDatabase());
 
         GPS_Service.start(SettingsActivity.this);
@@ -157,4 +158,5 @@ public class SettingsActivity extends ToolbarCompatActivity implements SharedPre
         intent.putExtra(IntentExtras.alarm, currentAlarm);
         startActivity(intent);
     }
+
 }

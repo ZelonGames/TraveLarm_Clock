@@ -4,7 +4,6 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.database.sqlite.SQLiteDatabase;
 import android.location.Location;
 import android.media.AudioManager;
 import android.media.Ringtone;
@@ -18,10 +17,10 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
 
 import java.util.HashMap;
 
+import zelongames.travelarm_clock.CustomPreferences.DistancePickerPreference;
 import zelongames.travelarm_clock.Database.DatabaseHelper;
 import zelongames.travelarm_clock.Helpers.DialogHelper;
 import zelongames.travelarm_clock.Helpers.StorageHelper;
@@ -47,11 +46,11 @@ public class Alarm implements Parcelable {
     public String ringtoneUriString = RingtoneManager.EXTRA_RINGTONE_DEFAULT_URI;
     private Ringtone ringtone = null;
 
-    public String getRingtoneName(Context context){
+    public String getRingtoneName(Context context) {
         return ringtone == null ? "" : ringtone.getTitle(context);
     }
 
-    public static String getRingtoneName(Context context, String ringtoneURI){
+    public static String getRingtoneName(Context context, String ringtoneURI) {
         Uri uri = Uri.parse(ringtoneURI);
         Ringtone dummyRingtone = RingtoneManager.getRingtone(context, uri);
         return dummyRingtone.getTitle(context);
@@ -90,6 +89,29 @@ public class Alarm implements Parcelable {
         return locationName;
     }
 
+    private String meterTypeName = "";
+
+    public String getMeterTypeName() {
+        return meterTypeName;
+    }
+
+    public void setMeterTypeName(DistancePickerPreference.MeasureType measureType) {
+        switch (measureType) {
+            case KM:
+                meterTypeName = "Kilometers";
+                break;
+            case M:
+                meterTypeName = "Meters";
+                break;
+            case F:
+                meterTypeName = "Feet";
+                break;
+            default:
+                meterTypeName = measureType.name();
+                break;
+        }
+    }
+
     private LatLng location = null;
 
     public LatLng getLocation() {
@@ -103,6 +125,7 @@ public class Alarm implements Parcelable {
     }
 
     public int distanceInMeters = 200;
+    public int meterTypeDistance = 0;
     public boolean vibrating = true;
     public boolean enabled = false;
 
@@ -120,7 +143,7 @@ public class Alarm implements Parcelable {
         this.location = location;
     }
 
-    public Alarm(String name, String locationName, String ringtoneURI, LatLng location, boolean vibrating, int distance){
+    public Alarm(String name, String locationName, String ringtoneURI, LatLng location, boolean vibrating, int distance) {
         this.name = name;
         this.locationName = locationName;
         this.ringtoneUriString = ringtoneURI;
@@ -133,19 +156,11 @@ public class Alarm implements Parcelable {
         this.name = in.readString();
         this.locationName = in.readString();
         this.ringtoneUriString = in.readString();
+        this.meterTypeName = in.readString();
+        this.meterTypeDistance = in.readInt();
         this.vibrating = byteToBoolean(in.readByte());
         this.enabled = byteToBoolean(in.readByte());
         this.isRunning = byteToBoolean(in.readByte());
-    }
-
-    public void copyAlarmDataFrom(Alarm alarm) {
-        this.name = alarm.getName();
-        this.locationName = alarm.getLocationName();
-        this.ringtoneUriString = alarm.ringtoneUriString;
-        this.vibrating = alarm.vibrating;
-        this.enabled = alarm.enabled;
-        this.distanceInMeters = alarm.distanceInMeters;
-        this.location = alarm.location;
     }
 
     public void updateAlarm(Context context, Location location) {
@@ -240,6 +255,8 @@ public class Alarm implements Parcelable {
         parcel.writeString(getName());
         parcel.writeString(getLocationName());
         parcel.writeString(ringtoneUriString);
+        parcel.writeString(meterTypeName);
+        parcel.writeInt(meterTypeDistance);
         parcel.writeByte(booleanToByte(vibrating));
         parcel.writeByte(booleanToByte(enabled));
         parcel.writeByte(booleanToByte(isRunning));
@@ -257,7 +274,7 @@ public class Alarm implements Parcelable {
         return !getName().equals(getLocationName());
     }
 
-    public static void removeAlarm(String displayName, String locationName, DatabaseHelper db){
+    public static void removeAlarm(String displayName, String locationName, DatabaseHelper db) {
         String alarmName = displayName == UN_NAMED_TAG ? locationName : displayName;
         DatabaseHelper.deleteItemFromDatabase(StorageHelper.alarms.get(alarmName), db.getWritableDatabase());
     }

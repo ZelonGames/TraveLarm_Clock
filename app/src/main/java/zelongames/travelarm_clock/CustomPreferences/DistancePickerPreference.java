@@ -13,19 +13,26 @@ public class DistancePickerPreference extends DialogPreference {
     private static final int DEFAULT_VALUE = 200;
     private int currentValue = DEFAULT_VALUE;
 
-    private Integer currentMeasureType = null;
+    public enum MeasureType {
+        KM,
+        M,
+        F,
+    }
+
+    private MeasureType measureType = MeasureType.M;
+
+    public MeasureType getMeasureType() {
+        return measureType;
+    }
+
+    private String[] values = new String[10];
+
     private NumberPicker numberPicker = null;
     private NumberPicker measurePicker = null;
 
-    private static final String KM = "km";
-    private static final String M = "m";
-    private static final String FT = "ft";
-
-    private static final String[] measures = {
-            KM,
-            M,
-            FT,
-    };
+    public int getCurrentValue(){
+        return currentValue;
+    }
 
     public DistancePickerPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -40,11 +47,22 @@ public class DistancePickerPreference extends DialogPreference {
         setupMeasurePicker();
     }
 
-    private void setupNumberPicker() {
-        final String[] values = new String[10];
+    private void initializeMeasureTypeValues(MeasureType measureType) {
+        if (numberPicker == null)
+            numberPicker = getDialog().findViewById(R.id.numberPicker);
 
-        for (int i = 1; i <= values.length; i++) {
-            values[i - 1] = Integer.toString(100 * i);
+        switch (measureType) {
+            case KM:
+                for (int i = 1; i <= values.length; i++) {
+                    values[i - 1] = Integer.toString(i);
+                }
+                break;
+            case M:
+            case F:
+                for (int i = 1; i <= values.length; i++) {
+                    values[i - 1] = Integer.toString(100 * i);
+                }
+                break;
         }
 
         numberPicker = getDialog().findViewById(R.id.numberPicker);
@@ -52,6 +70,10 @@ public class DistancePickerPreference extends DialogPreference {
         numberPicker.setMaxValue(values.length - 1);
         numberPicker.setValue(currentValue / 100 - 1);
         numberPicker.setDisplayedValues(values);
+    }
+
+    private void setupNumberPicker() {
+        initializeMeasureTypeValues(measureType);
 
         numberPicker.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
             @Override
@@ -64,15 +86,17 @@ public class DistancePickerPreference extends DialogPreference {
     private void setupMeasurePicker() {
         measurePicker = getDialog().findViewById(R.id.measurePicker);
         measurePicker.setMinValue(0);
-        measurePicker.setMaxValue(measures.length - 1);
+        measurePicker.setMaxValue(MeasureType.values().length - 1);
         measurePicker.setValue(1);
-        currentMeasureType = measurePicker.getValue();
-        measurePicker.setDisplayedValues(measures);
+        measureType = MeasureType.values()[measurePicker.getValue()];
+
+        measurePicker.setDisplayedValues(getMeasures());
 
         measurePicker.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
             @Override
             public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
-                currentMeasureType = newVal;
+                measureType = MeasureType.values()[newVal];
+                initializeMeasureTypeValues(measureType);
             }
         });
     }
@@ -80,21 +104,32 @@ public class DistancePickerPreference extends DialogPreference {
     @Override
     protected void onDialogClosed(boolean positiveResult) {
         if (positiveResult) {
-            persistInt(getConvertedValue(measures[currentMeasureType]));
+            persistInt(getConvertedValue(measureType));
+
         }
     }
 
-    private int getConvertedValue(String measure) {
+    private int getConvertedValue(MeasureType measureType) {
         // Convert anything to meters
-        switch (measure) {
+        switch (measureType) {
             case KM:
                 return currentValue * 1000;
             case M:
                 return currentValue;
-            case FT:
-                return (int)(currentValue * 0.3048);
+            case F:
+                return (int) (currentValue * 0.3048);
             default:
                 return currentValue;
         }
+    }
+
+    private String[] getMeasures() {
+        String[] measures = new String[MeasureType.values().length];
+
+        for (int i = 0; i < MeasureType.values().length; i++) {
+            measures[i] = MeasureType.values()[i].name();
+        }
+
+        return measures;
     }
 }
