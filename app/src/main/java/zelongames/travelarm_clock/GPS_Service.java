@@ -15,10 +15,6 @@ import com.google.android.gms.location.LocationResult;
 public class GPS_Service extends Service {
 
     private GPS gps = null;
-/*
-    public GPS_Service(){
-        super("GPS Thread");
-    }*/
 
     @Override
     public void onCreate() {
@@ -36,20 +32,12 @@ public class GPS_Service extends Service {
             }
         }, true);
     }
-/*
-    @Nullable
-    @Override
-    public IBinder onBind(Intent intent) {
-        return null;
-    }
-*/
-/*
-    @Override
-    protected void onHandleIntent(@Nullable Intent intent) {
-        Log.d("MyIntentService", "onHandle: " + Thread.currentThread().getName());
 
-        gps.startLocationUpdates(this);
-    }*/
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        super.onStartCommand(intent, flags, startId);
+        return START_STICKY;
+    }
 
     @Override
     public void onDestroy() {
