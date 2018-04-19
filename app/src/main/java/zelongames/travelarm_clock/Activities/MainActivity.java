@@ -114,13 +114,13 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
                 }
             }, false);
         }
-
         //AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
     }
 
     private void setupDatabase(){
         databaseHelper = new DatabaseHelper(this);
-        databaseHelper.getReadableDatabase();
+        SQLiteDatabase readableDatabase = databaseHelper.getReadableDatabase();
+        DatabaseHelper.readItemsFromDatabase(readableDatabase);
     }
 
     private void setCurrentAlarm(Intent intent) {
