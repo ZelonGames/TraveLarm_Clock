@@ -29,8 +29,6 @@ import zelongames.travelarm_clock.Helpers.ViewHelper;
 
 public class Alarm implements Parcelable {
 
-    public static final String UN_NAMED_TAG = "Unnamed";
-
     public static String currentAlarmName = "";
     public static String currentLocationName = "";
     public static LatLng currentLocation = null;
@@ -73,8 +71,8 @@ public class Alarm implements Parcelable {
             return name;
     }
 
-    public String getDisplayName() {
-        return hasCustomName() ? getName() : UN_NAMED_TAG;
+    public String getDisplayName(Context context) {
+        return hasCustomName() ? getName() : context.getString(R.string.Unnamed);
     }
 
     public void setName(String name, HashMap<String, Alarm> alarmList) {
@@ -126,7 +124,7 @@ public class Alarm implements Parcelable {
     }
 
     public int distanceInMeters = 200;
-    public int meterTypeDistance = 0;
+    public int meterTypeDistance = distanceInMeters;
     public boolean vibrating = true;
     public boolean enabled = false;
 
@@ -278,8 +276,8 @@ public class Alarm implements Parcelable {
         return !getName().equals(getLocationName());
     }
 
-    public static void removeAlarm(String displayName, String locationName, DatabaseHelper db) {
-        String alarmName = displayName == UN_NAMED_TAG ? locationName : displayName;
+    public static void removeAlarm(Context context, String displayName, String locationName, DatabaseHelper db) {
+        String alarmName = displayName ==  context.getString(R.string.Unnamed) ? locationName : displayName;
         DatabaseHelper.deleteItemFromDatabase(StorageHelper.alarms.get(alarmName), db.getWritableDatabase());
     }
 }

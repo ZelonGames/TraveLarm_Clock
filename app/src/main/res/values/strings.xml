@@ -1,7 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">TraveLarm_Clock</string>
 
-    <array name="settingItems">
-        <item></item>
-    </array>
+    <!--Main Layout-->
+    <string name="searchLocation">Search for a location</string>
+
+    <!--Alarm Bar (Running mode)-->
+    <string name="DistanceLeft">Distance left: </string>
+    <string name="Destination">Destination: </string>
+
+    <!--Alarm Dialog-->
+    <string name="NewAlarm">New Alarm</string>
+    <string name="AlarmMessage">Are you sure you want to create an alarm at: </string>
+    <string name="Yes">Yes</string>
+    <string name="No">No</string>
+
+    <!--Toast Messages-->
+    <string name="RequestsFailed">You can\'t make map requests</string>
+
+    <!--Alarm Collection-->
+    <string name="AlarmCollectionTitle">Alarm Collection</string>
+    <string name="Unnamed">Unnamed</string>
+
+    <!--Dialog messages-->
+    <string name="RemoveQuestionPart1">Are you sure you want to remove </string>
+    <string name="RemoveQuestionPart2"> from your alarm collection?</string>
+
+    <!--Alarm Settings-->
+    <string name="AlarmSettingsTitle">Alarm Settings</string>
+    <string name="DialogTitle">Alarm Name</string>
+    <string name="DistancePickerTitle">Distance</string>
+    <string name="RingtoneTitle">Ringtone</string>
+    <string name="VibrateTitle">Vibrate</string>
+    <string name="EnabledTitle">Enabled</string>
+    <string name="ApplyButtonTitle">Apply Changes</string>
 </resources>

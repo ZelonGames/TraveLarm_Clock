@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TraveLarm_Clock</string>
+
+    <!--Main Layout-->
+    <string name="searchLocation">Sök efter en plats</string>
+
+    <!--Alarm Bar (Running mode)-->
+    <string name="DistanceLeft">Avstånd kvar: </string>
+    <string name="Destination">Mål: </string>
+
+    <!--Alarm Dialog-->
+    <string name="NewAlarm">Nytt Alarm</string>
+    <string name="AlarmMessage">Är du säker på att du vill skapa ett alarm på: </string>
+    <string name="Yes">Ja</string>
+    <string name="No">Nej</string>
+
+    <!--Toast Messages-->
+    <string name="RequestsFailed">Du kan inte göra kartförfrågningar</string>
+
+    <!--Alarm Collection-->
+    <string name="AlarmCollectionTitle">Alarm Kollektion</string>
+    <string name="Unnamed">Namnlös</string>
+
+    <!--Dialog messages-->
+    <string name="RemoveQuestionPart1">Är du säker på att du vill ta bort </string>
+    <string name="RemoveQuestionPart2"> från din kollektion?</string>
+
+    <!--Alarm Settings-->
+    <string name="AlarmSettingsTitle">Alarm Inställningar</string>
+    <string name="DialogTitle">Alarm Namn</string>
+    <string name="DistancePickerTitle">Avstånd</string>
+    <string name="RingtoneTitle">Ringtone</string>
+    <string name="VibrateTitle">Vibrera</string>
+    <string name="EnabledTitle">aktiverad</string>
+    <string name="ApplyButtonTitle">Tillämpa ändringar</string>
+</resources>

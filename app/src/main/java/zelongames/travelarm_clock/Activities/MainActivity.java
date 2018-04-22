@@ -180,9 +180,9 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
                         location.setLatitude(recievedLatitude);
                         currentAlarm.updateAlarm(MainActivity.this, location);
 
-                        txtDistanceLeft.setText("Distance left: " + currentAlarm.getCurrentDistance() + "m");
-                        String alarmName = currentAlarm.hasCustomName() ? " (" + currentAlarm.getDisplayName() + ")" : "";
-                        txtDestination.setText("Destination: " + currentAlarm.getLocationName() + alarmName);
+                        txtDistanceLeft.setText(getString(R.string.DistanceLeft) + currentAlarm.getCurrentDistance() + "m");
+                        String alarmName = currentAlarm.hasCustomName() ? " (" + currentAlarm.getDisplayName(MainActivity.this) + ")" : "";
+                        txtDestination.setText(getString(R.string.Destination) + currentAlarm.getLocationName() + alarmName);
                     }
                 }
             };
@@ -246,9 +246,9 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
                 .position(Alarm.currentLocation)
                 .title(Alarm.currentLocationName);
 
-        DialogHelper.createPositiveNegativeDialog(this, "New Alarm",
-                "Are you sure you want to create an alarm at: " + markerOptions.getTitle() + "?",
-                "Yes", "No", new DialogInterface.OnClickListener() {
+        DialogHelper.createPositiveNegativeDialog(this, getString(R.string.NewAlarm),
+                getString(R.string.AlarmMessage) + markerOptions.getTitle() + "?",
+                getString(R.string.Yes), getString(R.string.No), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         Marker marker = gMap.addMarker(markerOptions);
@@ -287,7 +287,7 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
             Dialog errorDialog = GoogleApiAvailability.getInstance().getErrorDialog(this, available, ERROR_DIALOG_REQUEST);
             errorDialog.show();
         } else
-            Toast.makeText(this, "You can't make map requests", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.RequestsFailed), Toast.LENGTH_SHORT).show();
 
         return false;
     }
@@ -335,7 +335,6 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
         if (gMap != null)
             return;
 
-        Toast.makeText(this, "Map is Ready", Toast.LENGTH_SHORT).show();
         gMap = googleMap;
         gMap.setOnMarkerClickListener(this);
 

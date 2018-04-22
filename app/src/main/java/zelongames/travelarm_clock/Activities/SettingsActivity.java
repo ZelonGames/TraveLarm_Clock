@@ -79,7 +79,7 @@ public class SettingsActivity extends ToolbarCompatActivity implements SharedPre
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.alarm_settings);
-        initializeToolBar("Alarm Settings", R.menu.menu_toolbar_back, true);
+        initializeToolBar(getString(R.string.AlarmSettingsTitle), R.menu.menu_toolbar_back, true);
 
         initializeSharedPreferences();
 

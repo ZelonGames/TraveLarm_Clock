@@ -58,7 +58,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
     private void updateAlarmNamePreferenceSummary(boolean firstTime) {
         String summary;
         if (firstTime)
-            summary = activity.getCurrentAlarm().getDisplayName();
+            summary = activity.getCurrentAlarm().getDisplayName(getActivity());
         else
             summary = getCurrentPreferenceValue(alarmNamePreference, false).toString();
 
@@ -68,12 +68,12 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
     private void updateDistancePreferenceSummary(boolean firstTime) {
         String value;
         if (firstTime)
-            value = Integer.toString(activity.getCurrentAlarm().distanceInMeters);
+            value = Integer.toString(activity.getCurrentAlarm().meterTypeDistance);
         else
-            value = getCurrentPreferenceValue(distancePreference, true).toString();
+            value = Integer.toString(distancePreference.getCurrentValue());
 
         activity.getCurrentAlarm().setMeterTypeName(distancePreference.getMeasureType());
-        activity.getCurrentAlarm().meterTypeDistance = distancePreference.getCurrentValue();
+        activity.getCurrentAlarm().meterTypeDistance = Integer.parseInt(value);
         distancePreference.setSummary(activity.getCurrentAlarm().meterTypeDistance + " " + activity.getCurrentAlarm().getMeterTypeName());
     }
 

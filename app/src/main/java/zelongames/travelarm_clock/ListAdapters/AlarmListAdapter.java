@@ -49,7 +49,7 @@ public class AlarmListAdapter extends ArrayAdapter<Alarm> {
             holder = (ViewHolder) convertView.getTag();
 
         Alarm alarm = getItem(position);
-        holder.name.setText(alarm.getDisplayName());
+        holder.name.setText(alarm.getDisplayName(context));
         holder.location.setText(alarm.getLocationName());
 
         return convertView;

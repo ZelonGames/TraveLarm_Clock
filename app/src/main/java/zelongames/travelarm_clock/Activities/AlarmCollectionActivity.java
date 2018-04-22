@@ -4,7 +4,6 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -28,7 +27,7 @@ public class AlarmCollectionActivity extends ToolbarCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_alarm_collection);
 
-        initializeToolBar("Alarm Collection", R.menu.menu_toolbar_back, true);
+        initializeToolBar(getString(R.string.AlarmCollectionTitle), R.menu.menu_toolbar_back, true);
 
         DatabaseHelper.readItemsFromDatabase(MainActivity.getDatabaseHelper().getReadableDatabase());
 
@@ -57,13 +56,13 @@ public class AlarmCollectionActivity extends ToolbarCompatActivity {
                 final String alarmName = txtAlarmName.getText().toString();
                 final String location = txtLocationName.getText().toString();
 
-                String message = "Are you sure you want to remove \"" + location + " (" + alarmName + ")\" from your alarm collection?";
+                String message = getString(R.string.RemoveQuestionPart1) + "\"" + location + " (" + alarmName + ")\"" + getString(R.string.RemoveQuestionPart2);
 
-                Dialog dialog = DialogHelper.createPositiveNegativeDialog(AlarmCollectionActivity.this, alarmName, message, "Yes", "No",
+                Dialog dialog = DialogHelper.createPositiveNegativeDialog(AlarmCollectionActivity.this, alarmName, message, getString(R.string.Yes), getString(R.string.No),
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                Alarm.removeAlarm(alarmName, location, MainActivity.getDatabaseHelper());
+                                Alarm.removeAlarm(AlarmCollectionActivity.this, alarmName, location, MainActivity.getDatabaseHelper());
                                 listView.removeViewInLayout(view);
                             }
                         },
@@ -94,7 +93,7 @@ public class AlarmCollectionActivity extends ToolbarCompatActivity {
     private String getChosenAlarmName(View view){
         TextView nameTxtView = view.findViewById(R.id.alarmName);
         String alarmName = nameTxtView.getText().toString();
-        if (nameTxtView.getText().equals(Alarm.UN_NAMED_TAG)){
+        if (nameTxtView.getText().equals(getString(R.string.Unnamed))){
             TextView locationNameTxtView = view.findViewById(R.id.alarmLocation);
             alarmName = locationNameTxtView.getText().toString();
         }
