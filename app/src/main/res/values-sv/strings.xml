@@ -38,4 +38,9 @@
     <string name="VibrateTitle">Vibrera</string>
     <string name="EnabledTitle">Aktiverad</string>
     <string name="ApplyButtonTitle">Tillämpa ändringar</string>
+
+    <!--Value names-->
+    <string name="Meters">Meter</string>
+    <string name="Kilometers">Kilometer</string>
+    <string name="Feet">Fot</string>
 </resources>

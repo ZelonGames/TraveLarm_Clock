@@ -1,11 +1,13 @@
 package zelongames.travelarm_clock.Activities;
 
 import android.content.Intent;
+import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import zelongames.travelarm_clock.Helpers.VersionHelper;
 import zelongames.travelarm_clock.R;
 
 public class ToolbarCompatActivity extends AppCompatActivity {
@@ -23,6 +25,9 @@ public class ToolbarCompatActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle(title);
         getSupportActionBar().setDisplayHomeAsUpEnabled(displayBackButton);
+
+        if (VersionHelper.isVersionLolipopOrLater())
+            toolbar.setElevation(10f);
     }
 
     @Override

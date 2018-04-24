@@ -38,4 +38,9 @@
     <string name="VibrateTitle">Vibrate</string>
     <string name="EnabledTitle">Enabled</string>
     <string name="ApplyButtonTitle">Apply Changes</string>
+
+    <!--Value names-->
+    <string name="Meters">Meters</string>
+    <string name="Kilometers">Kilometers</string>
+    <string name="Feet">Feet</string>
 </resources>

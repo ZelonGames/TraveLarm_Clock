@@ -245,6 +245,15 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
                 .position(Alarm.currentLocation)
                 .title(Alarm.currentLocationName);
 
+        if (StorageHelper.alarms.containsKey(markerOptions.getTitle()))
+        {
+            hideKeyboard();
+            Toast.makeText(this, "You already have an alarm at: " + markerOptions.getTitle(), Toast.LENGTH_LONG).show();
+            searchText.setText("");
+            return;
+        }
+
+
         DialogHelper.createPositiveNegativeDialog(this, getString(R.string.NewAlarm),
                 getString(R.string.AlarmMessage) + markerOptions.getTitle() + "?",
                 getString(R.string.Yes), getString(R.string.No), new DialogInterface.OnClickListener() {
@@ -265,6 +274,7 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         dialogInterface.dismiss();
+                        searchText.setText("");
                     }
                 }).show();
     }

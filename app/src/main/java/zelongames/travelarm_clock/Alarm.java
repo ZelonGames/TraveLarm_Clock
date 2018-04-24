@@ -15,7 +15,6 @@ import android.os.Vibrator;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
 
@@ -27,7 +26,7 @@ import zelongames.travelarm_clock.Helpers.DialogHelper;
 import zelongames.travelarm_clock.Helpers.StorageHelper;
 import zelongames.travelarm_clock.Helpers.ViewHelper;
 
-public class Alarm implements Parcelable {
+public final class Alarm implements Parcelable {
 
     public static String currentAlarmName = "";
     public static String currentLocationName = "";
@@ -94,16 +93,16 @@ public class Alarm implements Parcelable {
         return meterTypeName;
     }
 
-    public void setMeterTypeName(DistancePickerPreference.MeasureType measureType) {
+    public void setMeterTypeName(Context context, DistancePickerPreference.MeasureType measureType) {
         switch (measureType) {
             case KM:
-                meterTypeName = "Kilometers";
+                meterTypeName = context.getString((R.string.Kilometers));
                 break;
             case M:
-                meterTypeName = "Meters";
+                meterTypeName = context.getString((R.string.Meters));
                 break;
-            case F:
-                meterTypeName = "Feet";
+            case FT:
+                meterTypeName = context.getString(R.string.Feet);
                 break;
             default:
                 meterTypeName = measureType.name();

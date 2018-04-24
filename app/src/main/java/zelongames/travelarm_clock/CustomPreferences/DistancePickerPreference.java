@@ -16,7 +16,7 @@ public class DistancePickerPreference extends DialogPreference {
     public enum MeasureType {
         KM,
         M,
-        F,
+        FT,
     }
 
     private MeasureType measureType = MeasureType.M;
@@ -58,7 +58,7 @@ public class DistancePickerPreference extends DialogPreference {
                 }
                 break;
             case M:
-            case F:
+            case FT:
                 for (int i = 1; i <= values.length; i++) {
                     values[i - 1] = Integer.toString(100 * i);
                 }
@@ -116,7 +116,7 @@ public class DistancePickerPreference extends DialogPreference {
                 return currentValue * 1000;
             case M:
                 return currentValue;
-            case F:
+            case FT:
                 return (int) (currentValue * 0.3048);
             default:
                 return currentValue;

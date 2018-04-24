@@ -72,7 +72,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         else
             value = Integer.toString(distancePreference.getCurrentValue());
 
-        activity.getCurrentAlarm().setMeterTypeName(distancePreference.getMeasureType());
+        activity.getCurrentAlarm().setMeterTypeName(getActivity(), distancePreference.getMeasureType());
         activity.getCurrentAlarm().meterTypeDistance = Integer.parseInt(value);
         distancePreference.setSummary(activity.getCurrentAlarm().meterTypeDistance + " " + activity.getCurrentAlarm().getMeterTypeName());
     }
