@@ -15,6 +15,10 @@
     <string name="Yes">Yes</string>
     <string name="No">No</string>
 
+    <!--Wakeup Dialog-->
+    <string name="WakeUp">Wake up!</string>
+    <string name="Stop">Stop</string>
+
     <!--Toast Messages-->
     <string name="RequestsFailed">You can\'t make map requests</string>
 

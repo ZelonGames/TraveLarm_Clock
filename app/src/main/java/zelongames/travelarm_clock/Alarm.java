@@ -195,11 +195,11 @@ public class Alarm implements Parcelable {
     }
 
     public void start(Context context) {
-        if (isRunning)
+        if (isRunning) {
             showDialog(context);
-        isRunning = false;
-        vibrate(context);
-        ringtone.play();
+            vibrate(context);
+            ringtone.play();
+        }
     }
 
     private void vibrate(Context context) {
@@ -213,11 +213,11 @@ public class Alarm implements Parcelable {
     }
 
     private void showDialog(final Context context) {
-        AlertDialog.Builder dialogBuilder = DialogHelper.createDialogBuilder(context, getName(), "Wake up!");
+        AlertDialog.Builder dialogBuilder = DialogHelper.createDialogBuilder(context, getName(), context.getString(R.string.WakeUp));
 
         final AppCompatActivity activity = (AppCompatActivity) context;
 
-        dialogBuilder.setNeutralButton("Stop", new DialogInterface.OnClickListener() {
+        dialogBuilder.setNeutralButton(context.getString(R.string.Stop), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 stop(context);

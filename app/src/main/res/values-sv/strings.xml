@@ -15,6 +15,10 @@
     <string name="Yes">Ja</string>
     <string name="No">Nej</string>
 
+    <!--Wakeup Dialog-->
+    <string name="WakeUp">Vakna!</string>
+    <string name="Stop">Stoppa</string>
+
     <!--Toast Messages-->
     <string name="RequestsFailed">Du kan inte göra kartförfrågningar</string>
 
@@ -32,6 +36,6 @@
     <string name="DistancePickerTitle">Avstånd</string>
     <string name="RingtoneTitle">Ringtone</string>
     <string name="VibrateTitle">Vibrera</string>
-    <string name="EnabledTitle">aktiverad</string>
+    <string name="EnabledTitle">Aktiverad</string>
     <string name="ApplyButtonTitle">Tillämpa ändringar</string>
 </resources>

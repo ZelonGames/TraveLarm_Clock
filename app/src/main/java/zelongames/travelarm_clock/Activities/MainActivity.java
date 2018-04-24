@@ -114,7 +114,6 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
                 }
             }, false);
         }
-        //AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
     }
 
     private void setupDatabase(){
@@ -225,7 +224,7 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
             public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
                 hideKeyboard();
                 addAlarm();
-                return false;
+                return true;
             }
         });
     }
@@ -258,10 +257,8 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
 
                         MapHelper.createCircleAroundAlarm(gMap, alarm);
 
-                        currentAlarm = StorageHelper.alarms.get(alarm.getName());
-
                         Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
-                        intent.putExtra(IntentExtras.alarm, currentAlarm);
+                        intent.putExtra(IntentExtras.alarm, StorageHelper.alarms.get(alarm.getName()));
                         startActivity(intent);
                     }
                 }, new DialogInterface.OnClickListener() {
@@ -400,10 +397,8 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
 
     @Override
     public boolean onMarkerClick(Marker marker) {
-        currentAlarm = StorageHelper.alarms.get(marker.getTitle());
-
         Intent intent = new Intent(this, SettingsActivity.class);
-        intent.putExtra(IntentExtras.alarm, currentAlarm);
+        intent.putExtra(IntentExtras.alarm, StorageHelper.alarms.get(marker.getTitle()));
         startActivity(intent);
 
         return false;
