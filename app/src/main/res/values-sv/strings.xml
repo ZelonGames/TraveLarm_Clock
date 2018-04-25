@@ -7,7 +7,7 @@
 
     <!--Alarm Bar (Running mode)-->
     <string name="DistanceLeft">Avstånd kvar:\u0020</string>
-    <string name="Destination">Mål:\u0020</string>
+    <string name="Destination">Destination:\u0020</string>
 
     <!--Alarm Dialog-->
     <string name="NewAlarm">Nytt Alarm</string>
