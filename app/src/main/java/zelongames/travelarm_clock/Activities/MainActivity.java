@@ -10,6 +10,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.LightingColorFilter;
+import android.graphics.PorterDuff;
 import android.location.Location;
 import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
@@ -22,6 +24,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -50,6 +53,7 @@ import zelongames.travelarm_clock.Alarm;
 import zelongames.travelarm_clock.Database.DatabaseHelper;
 import zelongames.travelarm_clock.Helpers.DialogHelper;
 import zelongames.travelarm_clock.GPS;
+import zelongames.travelarm_clock.Helpers.VersionHelper;
 import zelongames.travelarm_clock.IntentExtras;
 import zelongames.travelarm_clock.Helpers.MapHelper;
 import zelongames.travelarm_clock.PlaceAutocompleteAdapter;
@@ -137,6 +141,8 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
                 RelativeLayout searchLocationBar = findViewById(R.id.SearchLocationBar);
                 LinearLayout alarmInfoBar = findViewById(R.id.AlarmInfoBar);
                 ViewHelper.switchBetweenViews(searchLocationBar, alarmInfoBar);
+                //if (VersionHelper.isVersionLolipopOrLater())
+                    //alarmInfoBar.setElevation(50);
             }
         }
     }
@@ -248,7 +254,7 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
         if (StorageHelper.alarms.containsKey(markerOptions.getTitle()))
         {
             hideKeyboard();
-            Toast.makeText(this, "You already have an alarm at: " + markerOptions.getTitle(), Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.AlarmCreateFail) + markerOptions.getTitle(), Toast.LENGTH_LONG).show();
             searchText.setText("");
             return;
         }

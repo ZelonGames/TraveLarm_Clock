@@ -3,9 +3,11 @@ package zelongames.travelarm_clock.Fragments;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.EditTextPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+import android.preference.SwitchPreference;
 import android.support.annotation.Nullable;
 
 import zelongames.travelarm_clock.Activities.SettingsActivity;
@@ -17,9 +19,11 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
 
     private SettingsActivity activity = null;
 
-    private Preference alarmNamePreference = null;
+    private EditTextPreference alarmNamePreference = null;
     private DistancePickerPreference distancePreference = null;
     private Preference ringtonePreference = null;
+    private SwitchPreference vibratingPreference = null;
+    private SwitchPreference enabledPreference = null;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -36,12 +40,27 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         updateAlarmNamePreferenceSummary(true);
         updateDistancePreferenceSummary(true);
         updateRingtonePreferenceSummary(true);
+
+        activity.getCurrentAlarm().vibrating = vibratingPreference.isChecked();
+        activity.getCurrentAlarm().enabled = enabledPreference.isChecked();
     }
 
     private void initializePreferences() {
-        alarmNamePreference = findPreference(activity.getAlarmPreferenceName());
+        alarmNamePreference = (EditTextPreference)findPreference(activity.getAlarmPreferenceName());
+        SharedPreferences.Editor editor = alarmNamePreference.getSharedPreferences().edit();
+        editor.clear().apply();
+        alarmNamePreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                SharedPreferences.Editor editor = preference.getSharedPreferences().edit();
+                editor.clear().apply();
+                return false;
+            }
+        });
         distancePreference = (DistancePickerPreference)findPreference(activity.getDistancePreferenceName());
         ringtonePreference = findPreference(activity.getRingtonePreferenceName());
+        vibratingPreference = (SwitchPreference)findPreference(activity.getVibratingPreferenceName());
+        enabledPreference = (SwitchPreference)findPreference(activity.getEnabledPreferenceName());
     }
 
     @Override
@@ -68,7 +87,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
     private void updateDistancePreferenceSummary(boolean firstTime) {
         String value;
         if (firstTime)
-            value = Integer.toString(activity.getCurrentAlarm().meterTypeDistance);
+            value = Integer.toString(activity.getCurrentAlarm().distanceInMeters);
         else
             value = Integer.toString(distancePreference.getCurrentValue());
 

@@ -6,12 +6,12 @@
     <string name="searchLocation">Sök efter en plats</string>
 
     <!--Alarm Bar (Running mode)-->
-    <string name="DistanceLeft">Avstånd kvar: </string>
-    <string name="Destination">Mål: </string>
+    <string name="DistanceLeft">Avstånd kvar:\u0020</string>
+    <string name="Destination">Mål:\u0020</string>
 
     <!--Alarm Dialog-->
     <string name="NewAlarm">Nytt Alarm</string>
-    <string name="AlarmMessage">Är du säker på att du vill skapa ett alarm på: </string>
+    <string name="AlarmMessage">Är du säker på att du vill skapa ett alarm på:\u0020</string>
     <string name="Yes">Ja</string>
     <string name="No">Nej</string>
 
@@ -27,8 +27,8 @@
     <string name="Unnamed">Namnlös</string>
 
     <!--Dialog messages-->
-    <string name="RemoveQuestionPart1">Är du säker på att du vill ta bort </string>
-    <string name="RemoveQuestionPart2"> från din kollektion?</string>
+    <string name="RemoveQuestionPart1">Är du säker på att du vill ta bort\u0020</string>
+    <string name="RemoveQuestionPart2">\u0020från din kollektion?</string>
 
     <!--Alarm Settings-->
     <string name="AlarmSettingsTitle">Alarm Inställningar</string>
@@ -37,10 +37,12 @@
     <string name="RingtoneTitle">Ringtone</string>
     <string name="VibrateTitle">Vibrera</string>
     <string name="EnabledTitle">Aktiverad</string>
-    <string name="ApplyButtonTitle">Tillämpa ändringar</string>
+    <string name="ApplyButtonTitle">Spara ändringar</string>
 
     <!--Value names-->
     <string name="Meters">Meter</string>
     <string name="Kilometers">Kilometer</string>
     <string name="Feet">Fot</string>
+
+    <string name="AlarmCreateFail">Du har redan ett alarm på:\u0020</string>
 </resources>

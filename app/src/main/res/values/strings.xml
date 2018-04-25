@@ -6,12 +6,12 @@
     <string name="searchLocation">Search for a location</string>
 
     <!--Alarm Bar (Running mode)-->
-    <string name="DistanceLeft">Distance left: </string>
-    <string name="Destination">Destination: </string>
+    <string name="DistanceLeft">Distance left:\u0020</string>
+    <string name="Destination">Destination:\u0020</string>
 
     <!--Alarm Dialog-->
     <string name="NewAlarm">New Alarm</string>
-    <string name="AlarmMessage">Are you sure you want to create an alarm at: </string>
+    <string name="AlarmMessage">Are you sure you want to create an alarm at:\u0020</string>
     <string name="Yes">Yes</string>
     <string name="No">No</string>
 
@@ -27,8 +27,8 @@
     <string name="Unnamed">Unnamed</string>
 
     <!--Dialog messages-->
-    <string name="RemoveQuestionPart1">Are you sure you want to remove </string>
-    <string name="RemoveQuestionPart2"> from your alarm collection?</string>
+    <string name="RemoveQuestionPart1">Are you sure you want to remove\u0020</string>
+    <string name="RemoveQuestionPart2">\u0020from your alarm collection?</string>
 
     <!--Alarm Settings-->
     <string name="AlarmSettingsTitle">Alarm Settings</string>
@@ -37,10 +37,12 @@
     <string name="RingtoneTitle">Ringtone</string>
     <string name="VibrateTitle">Vibrate</string>
     <string name="EnabledTitle">Enabled</string>
-    <string name="ApplyButtonTitle">Apply Changes</string>
+    <string name="ApplyButtonTitle">Save Changes</string>
 
     <!--Value names-->
     <string name="Meters">Meters</string>
     <string name="Kilometers">Kilometers</string>
     <string name="Feet">Feet</string>
+
+    <string name="AlarmCreateFail">You already have an alarm at:\u0020</string>
 </resources>

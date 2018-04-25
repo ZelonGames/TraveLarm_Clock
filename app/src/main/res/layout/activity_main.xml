@@ -60,11 +60,13 @@
             android:layout_height="63sp"
             android:layout_below="@+id/toolbar"
             android:background="@color/colorSecondary"
+            android:elevation="50dp"
             android:visibility="gone">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
                 android:layout_gravity="center_vertical"
                 android:orientation="horizontal">
 
@@ -91,14 +93,17 @@
             </LinearLayout>
 
             <Button
+                android:id="@+id/btn_cancel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Cancel"
                 android:textColor="#fff"
+                android:theme="@style/CancelButton"
                 android:onClick="onCancelAlarm"/>
 
             </LinearLayout>
 
         </LinearLayout>
     </RelativeLayout>
+
 </android.support.constraint.ConstraintLayout>

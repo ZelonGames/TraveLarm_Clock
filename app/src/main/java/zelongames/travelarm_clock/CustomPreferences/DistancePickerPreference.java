@@ -105,7 +105,6 @@ public class DistancePickerPreference extends DialogPreference {
     protected void onDialogClosed(boolean positiveResult) {
         if (positiveResult) {
             persistInt(getConvertedValue(measureType));
-
         }
     }
 

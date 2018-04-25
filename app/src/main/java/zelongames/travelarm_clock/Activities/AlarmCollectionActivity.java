@@ -33,7 +33,7 @@ public class AlarmCollectionActivity extends ToolbarCompatActivity {
 
         final ListView listView = findViewById(R.id.alarmCollection);
 
-        AlarmListAdapter adapter = new AlarmListAdapter(this, R.layout.alarm_collection_list_layout, hashMapToArrayList(StorageHelper.alarms));
+        final AlarmListAdapter adapter = new AlarmListAdapter(this, R.layout.alarm_collection_list_layout, hashMapToArrayList(StorageHelper.alarms));
         listView.setAdapter(adapter);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -48,22 +48,22 @@ public class AlarmCollectionActivity extends ToolbarCompatActivity {
 
         listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
-            public boolean onItemLongClick(AdapterView<?> parent, final View view, int position, long id) {
+            public boolean onItemLongClick(AdapterView<?> parent, final View view, final int position, long id) {
 
                 TextView txtAlarmName = view.findViewById(R.id.alarmName);
                 TextView txtLocationName = view.findViewById(R.id.alarmLocation);
 
-                final String alarmName = txtAlarmName.getText().toString();
+                final String alarmDisplayName = txtAlarmName.getText().toString();
                 final String location = txtLocationName.getText().toString();
 
-                String message = getString(R.string.RemoveQuestionPart1) + "\"" + location + " (" + alarmName + ")\"" + getString(R.string.RemoveQuestionPart2);
+                String message = getString(R.string.RemoveQuestionPart1) + "\"" + location + " (" + alarmDisplayName + ")\"" + getString(R.string.RemoveQuestionPart2);
 
-                Dialog dialog = DialogHelper.createPositiveNegativeDialog(AlarmCollectionActivity.this, alarmName, message, getString(R.string.Yes), getString(R.string.No),
+                Dialog dialog = DialogHelper.createPositiveNegativeDialog(AlarmCollectionActivity.this, alarmDisplayName, message, getString(R.string.Yes), getString(R.string.No),
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                Alarm.removeAlarm(AlarmCollectionActivity.this, alarmName, location, MainActivity.getDatabaseHelper());
-                                listView.removeViewInLayout(view);
+                                Alarm.removeAlarm(AlarmCollectionActivity.this, alarmDisplayName, location, MainActivity.getDatabaseHelper());
+                                adapter.remove(adapter.getItem(position));
                             }
                         },
                         new DialogInterface.OnClickListener() {

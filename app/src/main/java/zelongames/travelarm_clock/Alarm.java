@@ -157,6 +157,7 @@ public final class Alarm implements Parcelable {
         this.ringtoneUriString = in.readString();
         this.meterTypeName = in.readString();
         this.meterTypeDistance = in.readInt();
+        this.distanceInMeters = in.readInt();
         this.vibrating = byteToBoolean(in.readByte());
         this.enabled = byteToBoolean(in.readByte());
         this.isRunning = byteToBoolean(in.readByte());
@@ -258,6 +259,7 @@ public final class Alarm implements Parcelable {
         parcel.writeString(ringtoneUriString);
         parcel.writeString(meterTypeName);
         parcel.writeInt(meterTypeDistance);
+        parcel.writeInt(distanceInMeters);
         parcel.writeByte(booleanToByte(vibrating));
         parcel.writeByte(booleanToByte(enabled));
         parcel.writeByte(booleanToByte(isRunning));
