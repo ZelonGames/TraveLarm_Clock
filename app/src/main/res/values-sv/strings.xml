@@ -23,7 +23,7 @@
     <string name="RequestsFailed">Du kan inte göra kartförfrågningar</string>
 
     <!--Alarm Collection-->
-    <string name="AlarmCollectionTitle">Alarm Kollektion</string>
+    <string name="AlarmCollectionTitle">Alarm Samling</string>
     <string name="Unnamed">Namnlös</string>
 
     <!--Dialog messages-->

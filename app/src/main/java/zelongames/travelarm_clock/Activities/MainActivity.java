@@ -141,8 +141,8 @@ public class MainActivity extends ToolbarCompatActivity implements OnMapReadyCal
                 RelativeLayout searchLocationBar = findViewById(R.id.SearchLocationBar);
                 LinearLayout alarmInfoBar = findViewById(R.id.AlarmInfoBar);
                 ViewHelper.switchBetweenViews(searchLocationBar, alarmInfoBar);
-                //if (VersionHelper.isVersionLolipopOrLater())
-                    //alarmInfoBar.setElevation(50);
+                if (VersionHelper.isVersionLolipopOrLater())
+                    alarmInfoBar.setElevation(10);
             }
         }
     }
