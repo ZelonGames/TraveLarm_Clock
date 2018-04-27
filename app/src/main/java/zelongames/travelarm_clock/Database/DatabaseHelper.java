@@ -49,22 +49,21 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public static void editItemFromDatabase(Alarm alarm, String oldName, String newName, String newRingtoneURI, String newVibrating, int newDistance, String newLat, String newLng, SQLiteDatabase db){
-        // Update name
-        String query = "UPDATE " + AlarmTableStructure.TABLE_NAME +
-                " SET " + AlarmTableStructure.COLUMN_ITEM_NAME + " = '" + newName + "' " +
-                "WHERE " + AlarmTableStructure.COLUMN_ITEM_NAME + " = '" + oldName + "'";
-        db.execSQL(query);
-
         // Update distance
-        query = "UPDATE " + AlarmTableStructure.TABLE_NAME +
+        String query = "UPDATE " + AlarmTableStructure.TABLE_NAME +
                 " SET " + AlarmTableStructure.COLUMN_DISTANCE + " = '" + newDistance + "' " +
                 "WHERE " + AlarmTableStructure.COLUMN_ITEM_NAME + " = '" + oldName + "'";
         db.execSQL(query);
 
-
         // Update ringtone
         query = "UPDATE " + AlarmTableStructure.TABLE_NAME +
                 " SET " + AlarmTableStructure.COLUMN_RINGTONE_URI + " = '" + newRingtoneURI + "' " +
+                "WHERE " + AlarmTableStructure.COLUMN_ITEM_NAME + " = '" + oldName + "'";
+        db.execSQL(query);
+
+        // Update name
+        query = "UPDATE " + AlarmTableStructure.TABLE_NAME +
+                " SET " + AlarmTableStructure.COLUMN_ITEM_NAME + " = '" + newName + "' " +
                 "WHERE " + AlarmTableStructure.COLUMN_ITEM_NAME + " = '" + oldName + "'";
         db.execSQL(query);
     }

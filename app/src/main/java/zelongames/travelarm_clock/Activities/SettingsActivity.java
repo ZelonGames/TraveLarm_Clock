@@ -86,7 +86,6 @@ public class SettingsActivity extends ToolbarCompatActivity implements SharedPre
         if (getIntent().getExtras() != null) {
             currentAlarm = getIntent().getExtras().getParcelable(IntentExtras.alarm);
             String alarmName = currentAlarm.getName();
-            currentAlarm = StorageHelper.alarms.get(alarmName);
 
             Toast.makeText(this, currentAlarm.getName(), Toast.LENGTH_SHORT).show();
         }
@@ -132,7 +131,9 @@ public class SettingsActivity extends ToolbarCompatActivity implements SharedPre
     }
 
     public void onApplyChanges(View view) {
-        final String oldName = new String(currentAlarm.getName());
+        String oldName = new String(currentAlarm.getName());
+        if (!StorageHelper.alarms.containsKey(oldName))
+            oldName = alarmName;
 
         if (alarmName != null)
             currentAlarm.setName(alarmName, StorageHelper.alarms);
